@@ -37,8 +37,10 @@ OI::OI() {
     
     stick.reset(new Joystick(0));
     
-    driver_LowerIntake.reset(new JoystickButton(stick.get(), 1));
-    driver_LowerIntake->WhileHeld(new Intake_Lower());
+    joy2Btn1.reset(new JoystickButton(stick.get(), 1));
+    joy2Btn1->WhileHeld(new Intake_Lower());
+
+
 
     // SmartDashboard Buttons
 
