@@ -27,7 +27,7 @@ class Robot: public SampleRobot
 	   int PPR = 1440;
 	   float enc_in = PPR/wheel_circumference;
 	   float Target = distance*enc_in;
-	   Lenc->Reset();
+	   Lenc->Reset();									//resets the encoders
 	   Renc->Reset();
 	   printf("\n Renc: %i", Renc->Get());
 	   if (distance > 0)//what direcion are we driving
