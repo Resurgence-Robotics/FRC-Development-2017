@@ -16,7 +16,7 @@ class Robot: public SampleRobot
 			right1(14),
 			right2(15)
 	    {
-	        Lenc = new Encoder(4,5, true, Encoder::EncodingType::k4X);
+	        Lenc = new Encoder(4,5, false, Encoder::EncodingType::k4X);
 	        Renc = new Encoder(2,3, true, Encoder::EncodingType::k4X);
 	    }
 
@@ -29,17 +29,17 @@ class Robot: public SampleRobot
 	   float Target = distance*enc_in;
 	   Lenc->Reset();									//resets the encoders
 	   Renc->Reset();
-	   printf("\n Renc: %i", Renc->Get());
-	   if (distance > 0)//what direcion are we driving
+
+	   if (distance > 0)//what direction are we driving
 	   {
-		   while(Renc->Get()<Target)//while we haven't reached target
+		   while(Lenc->Get()<Target)//while we haven't reached target
 		   {
 			   // drive forward
 			   left1.Set(0.5);
 			   left2.Set(0.5);
 			   right1.Set(-0.5);
 			   right2.Set(-0.5);
-			   printf("\n Renc: %i", Renc->Get()); //printing a response to the rio-log
+			   printf("\n Lenc: %i", Lenc->Get()); //printing a response to the rio-log
 			   Wait(0.1); //wait to allow code to execute
 		   }
 		   //stop
@@ -47,33 +47,34 @@ class Robot: public SampleRobot
 		   left2.Set(0.0);
 		   right1.Set(0.0);
 		   right2.Set(0.0);
-
+		   printf("\n End Lenc: %i\n", Lenc->Get()); //printing a response to the rio-log
 	   }
 	   if(distance < 0) //what direction are we driving
 	   {
-		   while(Renc->Get()>Target)//while we haven't reached target
+		   printf("\n Distance:%f",distance);
+		   while(Lenc->Get()>Target)//while we haven't reached target
 		   {
 			   //drive backwards
 			   left1.Set(-0.5);
 			   left2.Set(-0.5);
-			   right1.Set(-0.5);
-			   right2.Set(-0.5);
-			   printf("\n Rence: %i", Renc->Get()); // printing a response to the rio-log
+			   right1.Set(0.5);
+			   right2.Set(0.5);
+			   printf("\n Lenc: %i  Target:%f", Lenc->Get(),Target); // printing a response to the rio-log
 			   Wait(0.1); // wait to allow code to execute
 		   }
-		   left1.Set(0.0); // stahp
+		   left1.Set(0.0); // stop
 		   left2.Set(0.0);
 		   right1.Set(0.0);
 		   right2.Set(0.0);
-
+		   printf("\n End Lenc: %i\n", Lenc->Get()); //printing a response to the rio-log
 	   }
 	}
 
 
 	void Autonomous()
 	{
-		drive(5);
-		//results 12/6/16 -- robot did no stop
+		drive(-250);
+		//results 12/6/16 -- robot did not stop
 	}
 	void OperatorControl()
 	{}
