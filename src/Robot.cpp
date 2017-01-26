@@ -1,6 +1,7 @@
 #include "WPILib.h"
 #define leftY 1
 #define rightY 3
+#define STOP 0.0
 /**
  * This is a demo program showing the use of the RobotDrive class.
  * The SampleRobot class is the base of a robot application that will automatically call your
@@ -16,37 +17,64 @@ class Robot: public SampleRobot
 	//intialize class members here
 	Joystick stick; // only joystick
 
-	Spark left1;
-	Spark left2;
-	Spark right1;
-	Spark right2;
+	Spark Left1;
+	Spark Left2;
+	Spark Right1;
+	Spark Right2;
 	Spark ARM;
 	DoubleSolenoid Gripper;
+	Encoder *Renc;
+	Encoder *Lenc;
 
 public:
 	Robot() :
 		//initailize these in the same order they are instatiated (listed) above
 			stick(0),
-			left1(0),
-			left2(1),
-			right1(4),
-			right2(5),
+			Left1(0),
+			Left2(1),
+			Right1(4),
+			Right2(5),
 			ARM(2),
 			Gripper(0,1)
 
 	{
+		Renc= new Encoder(0,1, true, Encoder::EncodingType::k4X);
+		Lenc= new Encoder(2,3, true, Encoder::EncodingType::k4X);
 	}
-
+	void SetSpeed(float Rspeed, float Lspeed)
+	{
+		Right1.Set(-Rspeed);
+		Right2.Set(-Rspeed);
+		Left1.Set(Lspeed);
+		Left2.Set(Lspeed);
+	}
+	void SetSpeed(float speed)
+	{
+		SetSpeed(-speed, speed);
+	}
+	void Drive(float Distance)//in inches
+	{
+		float D=4;
+		float C=3.1416*D;
+		int cpr=1000;
+		int Counts =int(cpr/D*Distance);//
+		float speed =.75;
+		while(Renc->Get()<Counts)
+		{
+			SetSpeed(speed);
+		}SetSpeed(STOP);
+	}
 	/**
 	 * Runs the motors with arcade steering.
 	 */
 	void Autonomous()
 	{
-
+		Drive(12);
+	//	Turn(45);
 	}
 	void OperatorControl()
 	{
-		float threshhold=0.15;
+		//float threshhold=0.15;
 		while(IsOperatorControl() && IsEnabled())
 		{
 //			if (abs(stick.GetRawAxis(1))> threshhold)
@@ -71,10 +99,10 @@ public:
 //			}
 			float j1y=-1*stick.GetRawAxis(1)/2;
 			float j2y=-1*stick.GetRawAxis(3)/2;
-			left1.Set(j1y);
-			left2.Set(j1y);
-			right1.Set(j2y);
-			right2.Set(j2y);
+			Left1.Set(j1y);
+			Left2.Set(j1y);
+			Right1.Set(j2y);
+			Right2.Set(j2y);
 
 			if(stick.GetRawButton(3))//up
 			{
