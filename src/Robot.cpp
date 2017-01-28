@@ -28,6 +28,7 @@ class Robot: public SampleRobot
 	Encoder *Lenc;
 	ADXRS450_Gyro gyro;
 
+
 public:
 	Robot() :
 		//initailize these in the same order they are instatiated (listed) above
@@ -68,16 +69,20 @@ public:
 	}
 	void Turn(int angle)//degrees
 	{
-			  float Kp =0.03;
+	/*	float Kp =0.03;
 			 gyro.Reset();
 
 
 			 float targetHeading = gyro.GetAngle() + 45.0;
 			 while (gyro.GetAngle() < targetHeading)
 			 {
-			    SetSpeed(-0.25, 0.25);
+			    //SetSpeed(-0.25, 0.25);
+			 printf("\n Turning");
+
 			 }
-			 SetSpeed(STOP);
+			// SetSpeed(STOP);
+			 printf("\n STOP");
+		 */
 	}
 
 	/**
