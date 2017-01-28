@@ -1,4 +1,5 @@
 #include "WPILib.h"
+#include "math.h"
 #define leftY 1
 #define rightY 3
 #define STOP 0.0
@@ -15,8 +16,8 @@
 class Robot: public SampleRobot
 {
 	//intialize class members here
-	Joystick stick; // only joystick
 
+	Joystick stick; // only joystick
 	Spark Left1;
 	Spark Left2;
 	Spark Right1;
@@ -25,6 +26,7 @@ class Robot: public SampleRobot
 	DoubleSolenoid Gripper;
 	Encoder *Renc;
 	Encoder *Lenc;
+	ADXRS450_Gyro gyro;
 
 public:
 	Robot() :
@@ -57,20 +59,35 @@ public:
 		float D=4;
 		float C=3.1416*D;
 		int cpr=1000;
-		int Counts =int(cpr/D*Distance);//
+		int Counts =int(cpr/C*Distance);//
 		float speed =.75;
 		while(Renc->Get()<Counts)
 		{
 			SetSpeed(speed);
 		}SetSpeed(STOP);
 	}
+	void Turn(int angle)//degrees
+	{
+			  float Kp =0.03;
+			 gyro.Reset();
+
+
+			 float targetHeading = gyro.GetAngle() + 45.0;
+			 while (gyro.GetAngle() < targetHeading)
+			 {
+			    SetSpeed(-0.25, 0.25);
+			 }
+			 SetSpeed(STOP);
+	}
+
 	/**
 	 * Runs the motors with arcade steering.
 	 */
 	void Autonomous()
 	{
 		Drive(12);
-	//	Turn(45);
+
+
 	}
 	void OperatorControl()
 	{
