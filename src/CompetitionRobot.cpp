@@ -48,13 +48,13 @@ public:
 			Gripper(0,1)
 
 	{
-		Renc= new Encoder(0,1, true, Encoder::EncodingType::k4X);
-		Lenc= new Encoder(2,3, true, Encoder::EncodingType::k4X);
+		Renc= new Encoder(2,3, true, Encoder::EncodingType::k4X);
+		Lenc= new Encoder(0,1, true, Encoder::EncodingType::k4X);
 	}
 	void SetSpeed(float Rspeed, float Lspeed)
 	{
-		Right1.Set(-Rspeed);
-		Right2.Set(-Rspeed);
+		Right1.Set(Rspeed);
+		Right2.Set(Rspeed);
 		Left1.Set(Lspeed);
 		Left2.Set(Lspeed);
 	}
@@ -62,40 +62,30 @@ public:
 	{
 		SetSpeed(-speed, speed);
 	}
-	void Drive(float Distance)//in inches
-	{
-		float D=4;
-		float C=3.1416*D;
-		int cpr=1000;
-		int Counts =int(cpr/C*Distance);//
-		float speed =.75;
-		while(Renc->Get()<Counts)
-		{
-			SetSpeed(speed);
-		}SetSpeed(STOP);
-	}
-	void Turn(int angle)//degrees
-	{
-	//float Kp =0.03;
-	 gyro.Reset();
-
-	 	 float targetHeading = gyro.GetAngle() + angle;
-		 while(Map(gyro.GetAngle(),-1.0,1.0,-360.0,360.0) < targetHeading)
-		 {
-			SetSpeed(0.25, 0.25);
-			printf("\n CurrAngle:%i",Map(gyro.GetAngle(),-1.0,1.0,-360.0,360.0));
-
-		 }
-		 SetSpeed(STOP);
-		 printf("\n STOP");
-
-	}
 	void Autonomous()
 	{
-		while(true){
-	SetSpeed(1.0,1.0);
-	Wait(0.005);
-		}
+	//This is what I added... -- untested 2/6/17--
+
+		double Distance=300;
+		//set enc to 0
+		Renc->Reset();
+		while(Renc->Get() <= Distance)
+			{
+			SetSpeed(0.50);
+			printf("\n rightEncoder:%i",Renc->Get());
+			Wait(0.025);
+			}
+			SetSpeed(STOP);
+				printf("\n STOP");
+
+			//print f the right encoder
+
+
+	//	int distance = Left1->Get();
+	//	int distance = Left2->Get();
+	//  int distance = Right1->Get();
+	//	int distance = Right2->Get();
+
 	}
 	void OperatorControl()
 	{
