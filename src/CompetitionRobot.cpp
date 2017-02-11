@@ -32,8 +32,12 @@ class Robot: public SampleRobot
 	CANTalon Right2;
 	CANTalon ARM;
 	DoubleSolenoid Gripper;
+	DoubleSolenoid Solenoid2;
+	DoubleSolenoid Solenoid3;
+	DoubleSolenoid Solenoid4;
 	Encoder *Renc;
 	Encoder *Lenc;
+
 
 
 public:
@@ -45,13 +49,23 @@ public:
 			Right1(2),
 			Right2(3),
 			ARM(5),
-			Gripper(0,1)
+			Gripper(0,4),
+			Solenoid2(1,5),
+			Solenoid3(2,6),
+			Solenoid4(3,7)
+
 
 	{
 		m_pdp =new PowerDistributionPanel();
-		Renc= new Encoder(2,3, true, Encoder::EncodingType::k4X);
+		Renc= new Encoder(2,3, false, Encoder::EncodingType::k4X);
 		Lenc= new Encoder(0,1, true, Encoder::EncodingType::k4X);
 	}
+
+	//{
+	//Solenoid1 = new Solenoid(0);
+	//Solenoid1->Set(true);
+	//}
+
 	void SetSpeed(float Rspeed, float Lspeed)//tested working--Practice Bot
 	{
 		Right1.Set(-Rspeed);
@@ -77,7 +91,7 @@ public:
 			printf("\n Target:%f",Target);
 			if(distance > 0)//what direction are we driving
 			{
-				while(Renc->Get()> -1*Target)//while we haven't reached target
+				while(Renc->Get()> Target)//while we haven't reached target
 				{
 					// drive forward
 					SetSpeed(0.5);
@@ -101,35 +115,86 @@ public:
 		}
 	void Turn (float angle)
 			{
-			int radius = 13.25;//wheelbase Radius
-			float wheel_circumference=2*M_PI*8;
+
+			int approachSpeed = 0.25/3;
+			float speed =0.25;
+			int radius = 13.25/2;//wheelbase Radius
+			float wheelRadius = 2;
+			float wheel_circumference=2*M_PI*wheelRadius;
 			int PPR = 1440;
 			float enc_in = PPR/wheel_circumference;
 			float theta = angle*M_PI/180; //math
 			int arch = M_PI*radius*theta;
-			float target = -1*arch*enc_in;
+			float target = arch*enc_in;
+			float approach= 6.0*enc_in;
 			printf("\n arch: %i", arch);
-			printf("/n target: %f", target);
-			Wait (3.0);
+			printf("\n target: %f", target);
+			Wait (0.50);
 			Lenc->Reset();
 			Renc->Reset();
-			printf("\n Renc: %i", Renc->Get());  //\n is new line
-			while (Renc->Get()>target)
+			printf("\n Encoders->Reset()");  //\n is new line
+			if (angle>0)
+			{
+				while(Renc->Get()<target &&IsAutonomous())
 				{
-				SetSpeed(-0.25, 0.25);//turning right
+					printf("\n Renc: %i", Renc->Get());
+					if (Renc->Get()< approach ) //go slow
+					{
+						SetSpeed(-approachSpeed,approachSpeed);
+					}
+					if (Renc->Get()> approach )//go fast
+					{
+						SetSpeed(-speed, speed);//turning right
+					}
+					Wait(0.005);
+				}
+				SetSpeed(STOP);
+			}
+//			else if (angle<0)
+//			{
+//				while (Renc->Get()< approach ) //go slow
+//					{
+//					SetSpeed (-approachSpeed,approachSpeed);
+//					}
+//				while (Renc->Get()> approach )
+//					{
+//					SetSpeed(speed, -speed);
+//					printf("\n Renc: %i", Renc->Get());
+//					Wait(0.005);
+//					}
+//
+//					SetSpeed(STOP);
+//
+//			}
+
+			}
+
+
+
+	/*	while (Renc->Get()<target &&IsAutonomous())
+				{
+				SetSpeed(-speed, speed);//turning right
 				printf("\n Renc: %i", Renc->Get());
 				Wait(0.005);
 				}
-				SetSpeed(0.0);
+				SetSpeed(STOP);
 
-			while (Renc->Get()<target)
+
+			while (Renc->Get()>target &&IsAutonomous())
 				{
-				SetSpeed(0.25, -0.25);
+				SetSpeed(speed, -speed);
 				printf("\n Renc: %i", Renc->Get()); //|:T | :T
 				Wait(0.005);
 				}
-				SetSpeed(0.0);
-			}
+				SetSpeed(STOP);
+			*/
+
+
+
+
+
+
+
 	void DriveFRC(float outputMagnitude, float curve)
 		{
 		float leftOutput, rightOutput;
@@ -208,7 +273,8 @@ public:
 	}
 	void Autonomous()
 	{
-		Drive(20);
+		//Drive(20);
+		Turn(90);
 	}
 	void OperatorControl()
 	{
@@ -275,6 +341,67 @@ public:
 	}
 	void Test()
 	{
+		while(IsEnabled()&&IsTest())
+		{
+			if(stick.GetRawButton(7)&& stick.GetRawButton(1))//explicitly open
+			{
+				Gripper.Set(DoubleSolenoid::kForward);
+				Wait(0.05);
+			}
+			else if(stick.GetRawButton(7)&& stick.GetRawButton(2))//closed
+			{
+				Gripper.Set(DoubleSolenoid::kReverse);
+				Wait(0.05);
+			}
+			else
+			{
+				Gripper.Set(DoubleSolenoid::kOff);
+			}
+			if(stick.GetRawButton(1))//explicitly open
+			{
+				Solenoid2.Set(DoubleSolenoid::kForward);
+				Wait(0.05);
+			}
+			else if(stick.GetRawButton(2))//closed
+			{
+				Solenoid2.Set(DoubleSolenoid::kReverse);
+				Wait(0.05);
+			}
+			else
+			{
+				Solenoid2.Set(DoubleSolenoid::kOff);
+			}
+
+			if(stick.GetRawButton(3))//explicitly open
+			{
+				Solenoid3.Set(DoubleSolenoid::kForward);
+				Wait(0.05);
+			}
+			else if(stick.GetRawButton(5))//closed
+			{
+				Solenoid3.Set(DoubleSolenoid::kReverse);
+				Wait(0.05);
+			}
+			else
+			{
+				Solenoid3.Set(DoubleSolenoid::kOff);
+			}
+
+			if(stick.GetRawButton(4))//explicitly open
+			{
+				Solenoid4.Set(DoubleSolenoid::kForward);
+				Wait(0.05);
+			}
+			else if(stick.GetRawButton(6))//closed
+			{
+				Solenoid4.Set(DoubleSolenoid::kReverse);
+				Wait(0.05);
+			}
+			else
+			{
+				Solenoid4.Set(DoubleSolenoid::kOff);
+			}
+		}
 	}
 };
 
