@@ -21,7 +21,7 @@ long Map(float x, float in_min, float in_max, float out_min, float out_max){
 class Robot: public SampleRobot
 {
 	//intialize class members here
-
+	PowerDistributionPanel *m_pdp;
 	Joystick stick; // only joystick
 	ADXRS450_Gyro gyro;
 //	Joystick stick2;
@@ -38,54 +38,177 @@ class Robot: public SampleRobot
 
 public:
 	Robot() :
-		//initailize these in the same order they are instatiated (listed) above
+		//initialize these in the same order they are instatiated (listed) above
 			stick(0),
-			Left1(3),
-			Left2(4),
-			Right1(1),
-			Right2(2),
+			Left1(0),
+			Left2(1),
+			Right1(2),
+			Right2(3),
 			ARM(5),
 			Gripper(0,1)
 
 	{
+		m_pdp =new PowerDistributionPanel();
 		Renc= new Encoder(2,3, true, Encoder::EncodingType::k4X);
 		Lenc= new Encoder(0,1, true, Encoder::EncodingType::k4X);
 	}
-	void SetSpeed(float Rspeed, float Lspeed)
+	void SetSpeed(float Rspeed, float Lspeed)//tested working--Practice Bot
 	{
-		Right1.Set(Rspeed);
-		Right2.Set(Rspeed);
+		Right1.Set(-Rspeed);
+		Right2.Set(-Rspeed);
 		Left1.Set(Lspeed);
 		Left2.Set(Lspeed);
 	}
-	void SetSpeed(float speed)
+	void SetSpeed(float speed)//tested working--Practice Bot
 	{
-		SetSpeed(-speed, speed);
+		SetSpeed(speed, speed);
+	}
+	void Drive(float distance)//tested working--Practice Bot
+
+		{
+			float wheel_radius =2;
+			float wheel_circumference = 2*M_PI*wheel_radius;
+			int PPR = 360*4;
+			float enc_in = PPR/wheel_circumference;
+			float Target = distance*enc_in;
+			Lenc->Reset();
+			Renc->Reset();
+			printf("\n Renc: %i", Renc->Get());
+			printf("\n Target:%f",Target);
+			if(distance > 0)//what direction are we driving
+			{
+				while(Renc->Get()> -1*Target)//while we haven't reached target
+				{
+					// drive forward
+					SetSpeed(0.5);
+					printf("\n Renc: %i", Renc->Get()); // printing a response to the rio-log
+					Wait(0.001);//wait to allow code time to execute
+				}
+				SetSpeed(STOP);
+			}
+			if(distance < 0) //what direction are we driving
+			{
+				while(Renc->Get()>Target)//while we haven't reached target
+				{
+					// drive backwards
+					SetSpeed(-0.5);
+					printf("\n Renc: %i", Renc->Get()); // printing a response to the rio-log
+					Wait(0.001); // wait to allow code to execute
+				}
+				SetSpeed(STOP);
+
+			}
+		}
+	void Turn (float angle)
+			{
+			int radius = 13.25;//wheelbase Radius
+			float wheel_circumference=2*M_PI*8;
+			int PPR = 1440;
+			float enc_in = PPR/wheel_circumference;
+			float theta = angle*M_PI/180; //math
+			int arch = M_PI*radius*theta;
+			float target = -1*arch*enc_in;
+			printf("\n arch: %i", arch);
+			printf("/n target: %f", target);
+			Wait (3.0);
+			Lenc->Reset();
+			Renc->Reset();
+			printf("\n Renc: %i", Renc->Get());  //\n is new line
+			while (Renc->Get()>target)
+				{
+				SetSpeed(-0.25, 0.25);//turning right
+				printf("\n Renc: %i", Renc->Get());
+				Wait(0.005);
+				}
+				SetSpeed(0.0);
+
+			while (Renc->Get()<target)
+				{
+				SetSpeed(0.25, -0.25);
+				printf("\n Renc: %i", Renc->Get()); //|:T | :T
+				Wait(0.005);
+				}
+				SetSpeed(0.0);
+			}
+	void DriveFRC(float outputMagnitude, float curve)
+		{
+		float leftOutput, rightOutput;
+		float m_sensitivity = 0.5;
+		if (curve < 0)
+		{
+		   float value = log(-curve);
+		   float ratio = (value - m_sensitivity)/(value + m_sensitivity);
+		   if (ratio == 0) ratio =.0000000001;
+		  leftOutput = outputMagnitude / ratio;
+		  rightOutput = outputMagnitude;
+		}
+		else if (curve > 0)
+		{
+		  float value = log(curve);
+		  float ratio = (value - m_sensitivity)/(value + m_sensitivity);
+		   if (ratio == 0) ratio =.0000000001;
+		   leftOutput = outputMagnitude;
+		   rightOutput = outputMagnitude / ratio;
+		}
+		else
+		{
+		  leftOutput = outputMagnitude;
+		  rightOutput = outputMagnitude;
+		}
+		SetSpeed(rightOutput, leftOutput);
+//		left1.Set(-1*leftOutput);
+//		left2.Set(-1*leftOutput);
+//		right1.Set(rightOutput);
+//		right2.Set(rightOutput);
+		}
+	void drivestraight(float time, float speed)
+	{
+		gyro.Reset();
+		Wait(1.0);
+		float kp = 0.003;
+		float TimeElapsed =0.0;
+		while(TimeElapsed<time)
+		{
+			DriveFRC(speed, kp*gyro.GetAngle());
+			Wait(0.2);
+			TimeElapsed=TimeElapsed+0.2;
+		}
+		DriveFRC(0.0,0.0);
+	}
+	void drivestraightwithencoders(float target, float speed)
+	{
+		gyro.Reset();
+		Renc->Reset();
+		Wait(1.0);
+		float kp = 0.003;
+		int enc =0;
+			if(target>0)//forward incrementing positive
+			{
+				while(target>enc&&IsAutonomous())
+				{
+
+				enc=-1*Renc->Get();
+
+				printf("\n enc:%i",enc);
+				DriveFRC(speed, kp*gyro.GetAngle());
+				Wait(0.01);
+				}
+			}
+			if (target<0)//reverse incrementing negative
+			{
+				while(target<enc&&IsAutonomous())
+				{
+				enc=Renc->Get();
+				printf("\n enc:%i",enc);
+				DriveFRC(speed, kp*-1*gyro.GetAngle());
+				Wait(0.01);
+				}
+			}
+		DriveFRC(0.0,0.0);
 	}
 	void Autonomous()
 	{
-	//This is what I added... -- untested 2/6/17--
-
-		double Distance=300;
-		//set enc to 0
-		Renc->Reset();
-		while(Renc->Get() <= Distance)
-			{
-			SetSpeed(0.50);
-			printf("\n rightEncoder:%i",Renc->Get());
-			Wait(0.025);
-			}
-			SetSpeed(STOP);
-				printf("\n STOP");
-
-			//print f the right encoder
-
-
-	//	int distance = Left1->Get();
-	//	int distance = Left2->Get();
-	//  int distance = Right1->Get();
-	//	int distance = Right2->Get();
-
+		Drive(20);
 	}
 	void OperatorControl()
 	{
@@ -152,7 +275,6 @@ public:
 	}
 	void Test()
 	{
-
 	}
 };
 
