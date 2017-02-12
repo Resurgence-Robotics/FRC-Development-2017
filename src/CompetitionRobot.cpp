@@ -22,8 +22,8 @@ class Robot: public SampleRobot
 {
 	//intialize class members here
 	PowerDistributionPanel *m_pdp;
-	Joystick stick; // only joystick
 	ADXRS450_Gyro gyro;
+	Joystick stick; // only joystick
 //	Joystick stick2;
 //	Joystick stick3;
 	CANTalon Left1;
@@ -31,6 +31,7 @@ class Robot: public SampleRobot
 	CANTalon Right1;
 	CANTalon Right2;
 	CANTalon ARM;
+//	CANTalon Lift;
 	DoubleSolenoid Gripper;
 	DoubleSolenoid Solenoid2;
 	DoubleSolenoid Solenoid3;
@@ -48,8 +49,8 @@ public:
 			Left2(1),
 			Right1(2),
 			Right2(3),
-			ARM(5),
-			Gripper(0,4),
+			ARM(5),//port may change
+			Gripper(0,4),//Names need to be properly assigned, ordered pair (A, B) matches solenoids 
 			Solenoid2(1,5),
 			Solenoid3(2,6),
 			Solenoid4(3,7)
@@ -57,7 +58,7 @@ public:
 
 	{
 		m_pdp =new PowerDistributionPanel();
-		Renc= new Encoder(2,3, false, Encoder::EncodingType::k4X);
+		Renc= new Encoder(2,3, false, Encoder::EncodingType::k4X);//both encoders counting forward.
 		Lenc= new Encoder(0,1, true, Encoder::EncodingType::k4X);
 	}
 
@@ -135,26 +136,26 @@ public:
 			printf("\n Encoders->Reset()");  //\n is new line
 			if (angle>0)
 			{
-				while(Renc->Get()<target &&IsAutonomous())
+				while(Renc->Get()<target &&IsAutonomous())//move towards target
 				{
-					printf("\n Renc: %i", Renc->Get());
-					if (Renc->Get()< approach ) //go slow
+					if (Renc->Get()> approach )//go faster
 					{
-						SetSpeed(-approachSpeed,approachSpeed);
+						SetSpeed(-speed, speed);//turning right quickly
 					}
-					if (Renc->Get()> approach )//go fast
+					else if (Renc->Get()< approach ) //go slower
 					{
-						SetSpeed(-speed, speed);//turning right
+						SetSpeed(-approachSpeed,approachSpeed);//move more slowly as we aproach desired target
 					}
-					Wait(0.005);
+					printf("\n Renc: %i", Renc->Get());//print current process value
+					Wait(0.005);//give loop time to process
 				}
-				SetSpeed(STOP);
+				SetSpeed(STOP);//stop the robot when loop is complete
 			}
 //			else if (angle<0)
 //			{
 //				while (Renc->Get()< approach ) //go slow
 //					{
-//					SetSpeed (-approachSpeed,approachSpeed);
+//					SetSpeed (-approachSpeed,approachSpeed);//tunr left
 //					}
 //				while (Renc->Get()> approach )
 //					{
@@ -301,45 +302,10 @@ public:
 //				right1.Set(0.0);
 //				right2.Set(0.0);
 //			}
-			float j1y=-1*stick.GetRawAxis(1)/2;
-			float j2y=-1*stick.GetRawAxis(3)/2;
-			Left1.Set(j1y);
-			Left2.Set(j1y);
-			Right1.Set(j2y);
-			Right2.Set(j2y);
-			printf("\n DT:%f", j1y);
-
-			if(stick.GetRawButton(3))//up
-			{
-				ARM.Set(.75);
-			}
-			else if(stick.GetRawButton(2))//down
-			{
-				ARM.Set(-.75);
-			}
-			else
-			{
-				ARM.Set(0.0);
-			}
-			if(stick.GetRawButton(8))//explicitly open
-			{
-				Gripper.Set(DoubleSolenoid::kForward);
-				Wait(0.05);
-			}
-			else if(stick.GetRawButton(7))//closed
-			{
-				Gripper.Set(DoubleSolenoid::kReverse);
-				Wait(0.05);
-			}
-			else
-			{
-				Gripper.Set(DoubleSolenoid::kOff);
-			}
-
 			Wait(0.005);
 		}
 	}
-	void Test()
+	void Test()//test method created to allow manual control of all pnumatics and ensure functionality
 	{
 		while(IsEnabled()&&IsTest())
 		{
