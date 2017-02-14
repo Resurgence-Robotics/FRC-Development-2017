@@ -8,34 +8,26 @@ long Map(float x, float in_min, float in_max, float out_min, float out_max){
 	// use this function to match two value's scales proportionally
 	return ((x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min);
 }
-/**
- * This is a demo program showing the use of the RobotDrive class.
- * The SampleRobot class is the base of a robot application that will automatically call your
- * Autonomous and OperatorControl methods at the right time as controlled by the switches on
- * the driver station or the field controls.
- *
- * WARNING: While it may look like a good choice to use for your code if you're inexperienced,
- * don't. Unless you know what you are doing, complex code will be much more difficult under
- * this system. Use IterativeRobot or Command-Based instead if you're new.
- */
+int Funnel_Cycle=2;
+bool pressed=false;
+
 class Robot: public SampleRobot
 {
 	//intialize class members here
 	PowerDistributionPanel *m_pdp;
 	ADXRS450_Gyro gyro;
-	Joystick stick; // only joystick
-//	Joystick stick2;
-//	Joystick stick3;
+	Joystick stick1; // only joystick
+	Joystick stick2;
+	Joystick Gamepad;
 	CANTalon Left1;
 	CANTalon Left2;
 	CANTalon Right1;
 	CANTalon Right2;
-	CANTalon ARM;
-//	CANTalon Lift;
+	CANTalon Lift;
 	DoubleSolenoid Gripper;
-	DoubleSolenoid Solenoid2;
-	DoubleSolenoid Solenoid3;
-	DoubleSolenoid Solenoid4;
+	DoubleSolenoid Funnel;
+	DoubleSolenoid Arm_floor;
+	DoubleSolenoid Arm_peg;
 	Encoder *Renc;
 	Encoder *Lenc;
 
@@ -44,16 +36,18 @@ class Robot: public SampleRobot
 public:
 	Robot() :
 		//initialize these in the same order they are instatiated (listed) above
-			stick(0),
+			stick1(0),
+			stick2(1),
+			Gamepad(2),
 			Left1(0),
 			Left2(1),
 			Right1(2),
 			Right2(3),
-			ARM(5),//port may change
-			Gripper(0,4),//Names need to be properly assigned, ordered pair (A, B) matches solenoids 
-			Solenoid2(1,5),
-			Solenoid3(2,6),
-			Solenoid4(3,7)
+			Lift(5),//port may change
+			Gripper(0,4),
+			Funnel(2,6),
+			Arm_floor(1,5),
+			Arm_peg(3,7)
 
 
 	{
@@ -62,10 +56,6 @@ public:
 		Lenc= new Encoder(0,1, true, Encoder::EncodingType::k4X);
 	}
 
-	//{
-	//Solenoid1 = new Solenoid(0);
-	//Solenoid1->Set(true);
-	//}
 
 	void SetSpeed(float Rspeed, float Lspeed)//tested working--Practice Bot
 	{
@@ -169,10 +159,7 @@ public:
 //			}
 
 			}
-
-
-
-	/*	while (Renc->Get()<target &&IsAutonomous())
+/*	while (Renc->Get()<target &&IsAutonomous())
 				{
 				SetSpeed(-speed, speed);//turning right
 				printf("\n Renc: %i", Renc->Get());
@@ -189,13 +176,6 @@ public:
 				}
 				SetSpeed(STOP);
 			*/
-
-
-
-
-
-
-
 	void DriveFRC(float outputMagnitude, float curve)
 		{
 		float leftOutput, rightOutput;
@@ -279,94 +259,117 @@ public:
 	}
 	void OperatorControl()
 	{
-		//float threshhold=0.15;
+		float threshhold= 0.015;
 		while(IsOperatorControl() && IsEnabled())
 		{
-//			if (abs(stick.GetRawAxis(1))> threshhold)
-//			{
-//				left1.Set(-1*stick.GetRawAxis(1));
-//				left2.Set(-1*stick.GetRawAxis(1));
-//			}
-//			else
-//			{
-//				left1.Set(0.0);
-//				left2.Set(0.0);
-//			}
-//			if (abs(stick.GetRawAxis(rightY))> threshhold)
-//			{
-//				right1.Set (-1*stick.GetRawAxis(3));
-//				right2.Set (-1*stick.GetRawAxis(3));
-//			}
-//			else
-//			{
-//				right1.Set(0.0);
-//				right2.Set(0.0);
-//			}
-			Wait(0.005);
-		}
-	}
-	void Test()//test method created to allow manual control of all pnumatics and ensure functionality
-	{
-		while(IsEnabled()&&IsTest())
-		{
-			if(stick.GetRawButton(7)&& stick.GetRawButton(1))//explicitly open
+		//Driver1
+			//drivetrain
+				//tank drive with threshold
+						printf("\nY:%f",stick2.GetY());
+						if (abs(stick2.GetY())> threshhold)
+						{
+							printf("\nY:%f",stick2.GetY());
+							Left1.Set(-1.0*stick2.GetY());
+							Left2.Set(-1.0*stick2.GetY());
+						}
+						else
+						{
+							Left1.Set(0.0);
+							Left2.Set(0.0);
+						}
+						if (abs(stick1.GetY())> threshhold)
+						{
+							Right1.Set (-1*stick1.GetY());
+							Right2.Set (-1*stick1.GetY());
+						}
+						else
+						{
+							Right1.Set(0.0);
+							Right2.Set(0.0);
+						}
+
+		//Driver2
+			//funnel
+
+					if(Gamepad.GetRawButton(1)){ // when we press the switch for the first time,
+							if(!pressed) { // set as pressed
+								if(Funnel_Cycle==1) { // when we press it again, it gets turned off
+									Funnel_Cycle=0;
+								}else{
+									Funnel_Cycle= 1;
+								}
+							}
+						pressed = true; // keeping track of pressed allows the button to be
+					}else{ // held down
+						pressed = false;
+					}
+					if(Funnel_Cycle==1)
+					{
+						Funnel.Set(DoubleSolenoid::kForward);
+						Wait(0.05);//extend
+					}else if(Funnel_Cycle==0)
+					{
+						Funnel.Set(DoubleSolenoid::kReverse);
+						Wait(0.05);//retract
+					}else if(Funnel_Cycle==2)
+					{
+						Funnel.Set (DoubleSolenoid::kReverse);//retract
+					}
+			//lift
+			if(Gamepad.GetRawButton(6))  //lift intake up- right bumper
 			{
-				Gripper.Set(DoubleSolenoid::kForward);
-				Wait(0.05);
+				Lift.Set(0.75);
 			}
-			else if(stick.GetRawButton(7)&& stick.GetRawButton(2))//closed
+			else if(Gamepad.GetRawButton(5))   //lift outtake down- left bumper
 			{
-				Gripper.Set(DoubleSolenoid::kReverse);
-				Wait(0.05);
+				Lift.Set(-0.75);
 			}
-			else
+			else //stop lift
 			{
-				Gripper.Set(DoubleSolenoid::kOff);
-			}
-			if(stick.GetRawButton(1))//explicitly open
-			{
-				Solenoid2.Set(DoubleSolenoid::kForward);
-				Wait(0.05);
-			}
-			else if(stick.GetRawButton(2))//closed
-			{
-				Solenoid2.Set(DoubleSolenoid::kReverse);
-				Wait(0.05);
-			}
-			else
-			{
-				Solenoid2.Set(DoubleSolenoid::kOff);
+				Lift.Set(0.0);
 			}
 
-			if(stick.GetRawButton(3))//explicitly open
-			{
-				Solenoid3.Set(DoubleSolenoid::kForward);
-				Wait(0.05);
-			}
-			else if(stick.GetRawButton(5))//closed
-			{
-				Solenoid3.Set(DoubleSolenoid::kReverse);
-				Wait(0.05);
-			}
-			else
-			{
-				Solenoid3.Set(DoubleSolenoid::kOff);
-			}
-
-			if(stick.GetRawButton(4))//explicitly open
-			{
-				Solenoid4.Set(DoubleSolenoid::kForward);
-				Wait(0.05);
-			}
-			else if(stick.GetRawButton(6))//closed
-			{
-				Solenoid4.Set(DoubleSolenoid::kReverse);
-				Wait(0.05);
-			}
-			else
-			{
-				Solenoid4.Set(DoubleSolenoid::kOff);
-			}
+		//Shared
+			//gripper
+		   if ((Gamepad.GetRawButton(7))||(stick2.GetRawButton(1)))  //gripper open- left trigger
+		   {
+			   Gripper.Set(DoubleSolenoid::kForward);
+			   Wait(0.05);
+		   }
+		   else if((Gamepad.GetRawButton(8))||(stick1.GetRawButton(1)))   //gripper close- right trigger
+		   {
+			   Gripper.Set(DoubleSolenoid::kReverse);
+			   Wait(0.05);
+		   }
+		   else //close gripper
+		   {
+			   Gripper.Set(DoubleSolenoid::kOff);
+		   }
+		//arm
+		   if ((Gamepad.GetRawButton(4))||(stick1.GetRawButton(4)))//gear arm up- (both open) Right hand 4; Y button
+		   {
+			   Arm_floor.Set(DoubleSolenoid::kForward);
+			   Arm_peg.Set(DoubleSolenoid::kForward);
+			   Wait(0.05);
+		   }
+		   else if((Gamepad.GetRawButton(3))||(stick1.GetRawButton(6))) //gear arm middle- (one open, one closed) Right hand 6; B button
+		   {
+			   Arm_floor.Set(DoubleSolenoid::kForward);
+			   Arm_peg.Set(DoubleSolenoid::kReverse);
+			   Wait(0.05);
+		   }
+		   else if ((Gamepad.GetRawButton(2))||(stick1.GetRawButton(2)))  //gear arm down- (both closed) Right hand 2; A button toggle
+		   {
+			   Arm_floor.Set(DoubleSolenoid::kReverse);
+			   Arm_peg.Set(DoubleSolenoid::kReverse);
+			   Wait(0.05);
+		   }
+		   else //close gear
+		   {
+			   Arm_floor.Set(DoubleSolenoid::kOff);
+			   Arm_peg.Set(DoubleSolenoid::kOff);
+		   }
+		  Wait(0.001);
 		}
 	}
 };
