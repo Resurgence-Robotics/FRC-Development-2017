@@ -57,19 +57,19 @@ public:
 		Lenc= new Encoder(0,1, true, Encoder::EncodingType::k4X);
 	}
 
-
-	void SetSpeed(float Rspeed, float Lspeed)//tested working--Practice Bot
+//functions for drivetrain
+	void SetSpeed(float Rspeed, float Lspeed)					//tested working--Practice Bot
 	{
 		Right1.Set(-Rspeed);
 		Right2.Set(-Rspeed);
 		Left1.Set(Lspeed);
 		Left2.Set(Lspeed);
 	}
-	void SetSpeed(float speed)//tested working--Practice Bot
+	void SetSpeed(float speed)									//tested working--Practice Bot
 	{
 		SetSpeed(speed, speed);
 	}
-	void Drive(float distance)//tested working--Practice Bot
+	void Drive(float distance)									//needs to be tested
 
 		{
 			float wheel_radius =2;
@@ -105,8 +105,8 @@ public:
 
 			}
 		}
-	void Turn (float angle)
-			{
+	void Turn (float angle)										//needs to be tested
+		{
 
 			int approachSpeed = 0.25/3;
 			float speed =0.25;
@@ -159,25 +159,8 @@ public:
 //
 //			}
 
-			}
-/*	while (Renc->Get()<target &&IsAutonomous())
-				{
-				SetSpeed(-speed, speed);//turning right
-				printf("\n Renc: %i", Renc->Get());
-				Wait(0.005);
-				}
-				SetSpeed(STOP);
-
-
-			while (Renc->Get()>target &&IsAutonomous())
-				{
-				SetSpeed(speed, -speed);
-				printf("\n Renc: %i", Renc->Get()); //|:T | :T
-				Wait(0.005);
-				}
-				SetSpeed(STOP);
-			*/
-	void DriveFRC(float outputMagnitude, float curve)
+		}
+	void DriveFRC(float outputMagnitude, float curve)			//needs to be tested
 		{
 		float leftOutput, rightOutput;
 		float m_sensitivity = 0.5;
@@ -208,21 +191,7 @@ public:
 //		right1.Set(rightOutput);
 //		right2.Set(rightOutput);
 		}
-	void drivestraight(float time, float speed)
-	{
-		gyro.Reset();
-		Wait(1.0);
-		float kp = 0.003;
-		float TimeElapsed =0.0;
-		while(TimeElapsed<time)
-		{
-			DriveFRC(speed, kp*gyro.GetAngle());
-			Wait(0.2);
-			TimeElapsed=TimeElapsed+0.2;
-		}
-		DriveFRC(0.0,0.0);
-	}
-	void drivestraightwithencoders(float target, float speed)
+	void drivestraightwithencoders(float target, float speed)	//needs to be tested
 	{
 		gyro.Reset();
 		Renc->Reset();
@@ -234,8 +203,7 @@ public:
 				while(target>enc&&IsAutonomous())
 				{
 
-				enc=-1*Renc->Get();
-
+				enc=Renc->Get();
 				printf("\n enc:%i",enc);
 				DriveFRC(speed, kp*gyro.GetAngle());
 				Wait(0.01);
@@ -253,11 +221,20 @@ public:
 			}
 		DriveFRC(0.0,0.0);
 	}
+// functions for arm
+	void Arm_Up()
+	{}
+	void Arm_Mid()
+	{}
+	void Arm_Down()
+	{}
+
+//autonomous proceeedures below
 	void P1()//need to finish- work in progress!
 	{
 		Drive(Y3);
 		Turn(45);
-		Drive();
+		//Drive();
 
 	}
 	void P2()
@@ -276,7 +253,7 @@ public:
 
 	void Autonomous()
 	{
-		Drive(20);
+		//Drive(20);
 		//Turn(90);
 	/*
 	 	SetSpeed(1.0);
