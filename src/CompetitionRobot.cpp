@@ -10,6 +10,7 @@ long Map(float x, float in_min, float in_max, float out_min, float out_max){
 }
 int Funnel_Cycle=2;
 bool pressed=false;
+int Y3= 111;
 
 class Robot: public SampleRobot
 {
@@ -35,7 +36,7 @@ class Robot: public SampleRobot
 
 public:
 	Robot() :
-		//initialize these in the same order they are instatiated (listed) above
+		//initialize these in the same order they are instantiated (listed) above
 			stick1(0),
 			stick2(1),
 			Gamepad(2),
@@ -252,35 +253,63 @@ public:
 			}
 		DriveFRC(0.0,0.0);
 	}
+	void P1()//need to finish- work in progress!
+	{
+		Drive(Y3);
+		Turn(45);
+		Drive();
+
+	}
+	void P2()
+	{
+		Drive(Y3);
+		Arm_floor.Set(DoubleSolenoid::kForward);
+		Arm_peg.Set(DoubleSolenoid::kReverse);
+		Wait(0.05);
+		Drive(-10);
+
+	}
+	void P3()
+	{
+
+	}
+
 	void Autonomous()
 	{
-		//Drive(20);
-		Turn(90);
+		Drive(20);
+		//Turn(90);
+	/*
+	 	SetSpeed(1.0);
+		Wait(3.0);
+		SetSpeed(0.0);
+	*/
+
+
 	}
 	void OperatorControl()
 	{
-		float threshhold= 0.015;
+		float threshhold= 0.15;
 		while(IsOperatorControl() && IsEnabled())
 		{
 		//Driver1
 			//drivetrain
 				//tank drive with threshold
 						printf("\nY:%f",stick2.GetY());
-						if (abs(stick2.GetY())> threshhold)
+						if ((stick2.GetY()> threshhold) || (stick2.GetY()< -threshhold))
 						{
 							printf("\nY:%f",stick2.GetY());
-							Left1.Set(-1.0*stick2.GetY());
-							Left2.Set(-1.0*stick2.GetY());
+							Left1.Set(-stick2.GetY());
+							Left2.Set(-stick2.GetY());
 						}
 						else
 						{
 							Left1.Set(0.0);
 							Left2.Set(0.0);
 						}
-						if (abs(stick1.GetY())> threshhold)
+						if ((stick1.GetY()> threshhold)|| (stick1.GetY()< -threshhold))
 						{
-							Right1.Set (-1*stick1.GetY());
-							Right2.Set (-1*stick1.GetY());
+							Right1.Set (stick1.GetY());
+							Right2.Set (stick1.GetY());
 						}
 						else
 						{
@@ -331,12 +360,12 @@ public:
 
 		//Shared
 			//gripper
-		   if ((Gamepad.GetRawButton(7))||(stick2.GetRawButton(1)))  //gripper open- left trigger
+		   if ((Gamepad.GetRawButton(8))||(stick2.GetRawButton(1)))  //gripper open- left trigger
 		   {
 			   Gripper.Set(DoubleSolenoid::kForward);
 			   Wait(0.05);
 		   }
-		   else if((Gamepad.GetRawButton(8))||(stick1.GetRawButton(1)))   //gripper close- right trigger
+		   else if((Gamepad.GetRawButton(7))||(stick1.GetRawButton(1)))   //gripper close- right trigger
 		   {
 			   Gripper.Set(DoubleSolenoid::kReverse);
 			   Wait(0.05);
