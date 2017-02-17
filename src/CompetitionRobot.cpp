@@ -8,9 +8,8 @@ long Map(float x, float in_min, float in_max, float out_min, float out_max){
 	// use this function to match two value's scales proportionally
 	return ((x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min);
 }
-int Funnel_Cycle=2;
+int Funnel_Cycle=2;//initializing variable for funnel position
 bool pressed=false;
-int Y3= 111;
 
 class Robot: public SampleRobot
 {
@@ -52,9 +51,14 @@ public:
 
 
 	{
+
 		m_pdp =new PowerDistributionPanel();
 		Renc= new Encoder(2,3, true, Encoder::EncodingType::k4X);//both encoders counting forward.
 		Lenc= new Encoder(0,1, true, Encoder::EncodingType::k4X);
+		gyro.Calibrate();
+		printf("\n gyro Calibrating...");
+		Wait(1.5);//allow gyro to calibrate
+		printf("\n gyro:%f", gyro.GetAngle());
 	}
 
 //functions for drivetrain
@@ -114,19 +118,19 @@ public:
 					Wait(0.01);
 					}
 				}
-				if (target<0)//reverse incrementing negative
+				if (target<0)//reverse incrementing negative			//UNTESTED
 				{
 					while(target<enc&&IsAutonomous())
 					{
 					enc=Renc->Get();
 					printf("\n enc:%i",enc);
-					DriveFRC(speed, kp*gyro.GetAngle());
+					DriveFRC(-speed, kp*-gyro.GetAngle());
 					Wait(0.01);
 					}
 				}
 			DriveFRC(0.0,0.0);
 		}
-	void Drive(float distance)									// tested --working on final
+	void Drive(float distance)									// tested --working on final( +- 3/8 in)
 
 		{
 			float wheel_radius =2.4;
@@ -138,10 +142,10 @@ public:
 			Renc->Reset();
 			printf("\n Renc: %i", Renc->Get());
 			printf("\n Target:%f",Target);
-			drivestraightwithencoders(Target,.25);
+			drivestraightwithencoders(Target, 0.25);
 
 		}
-	void Turn (float angle)										//needs to be tested
+	void Turn (float angle)										//needs to be tested must be within 1 degree consistently
 		{
 
 			int approachSpeed = 0.25/3;
@@ -154,7 +158,8 @@ public:
 			float theta = angle*M_PI/180; //math
 			int arch = M_PI*radius*theta;
 			float target = arch*enc_in;
-			float approach= 6.0*enc_in;
+			float approach= 8*enc_in;
+			float Tolerance = 1*enc_in;
 			printf("\n arch: %i", arch);
 			printf("\n target: %f", target);
 			printf("\n Encoders Reset");  //\n is new line
@@ -167,7 +172,7 @@ public:
 				while(-1*Renc->Get()<target)//turn right
 				{
 					float error =target- (-1*Renc->Get());
-					if (error> approach )//go faster
+					if (error> approach )//go
 					{
 						SetSpeed(-speed, speed);//turning right quickly
 					}
@@ -176,12 +181,17 @@ public:
 						SetSpeed(-approachSpeed,approachSpeed);//move more slowly as we aproach desired target
 					}
 					printf("\n Renc: %i", -1*Renc->Get());//print current process value
-					Wait(0.1);//give loop time to process
+					Wait(0.05);//give loop time to process
+					if( (std::abs(target-(-1*Renc->Get())))>=Tolerance)
+					{
+						break;//within one inch or past target
+					}
 				}
 				SetSpeed(STOP);//stop the robot when loop is complete
 			}
 			else
 			{
+				//yet to be written
 				printf("\n Turning_Left");
 			}
 //			else if (angle<0)
@@ -202,47 +212,56 @@ public:
 //			}
 			return;
 		}
-
-
-// functions for arm
-	void Arm_Up()
-	{}
-	void Arm_Mid()
-	{}
-	void Arm_Down()
-	{}
-//autonomous proceeedures below
-	void P1()//need to finish- work in progress!
+	void GyroTurn()
 	{
-		Drive(Y3);
-		Turn(45);
-		//Drive();
 
 	}
-	void P2()
+	// functions for arm
+	void Arm_Up()
 	{
-		Drive(Y3);
+		Arm_floor.Set(DoubleSolenoid::kReverse);
+		Arm_peg.Set(DoubleSolenoid::kReverse);
+		Wait(0.05);
+	}
+	void Arm_Mid()
+	{
 		Arm_floor.Set(DoubleSolenoid::kForward);
 		Arm_peg.Set(DoubleSolenoid::kReverse);
 		Wait(0.05);
-		Drive(-10);
-
 	}
-	void P3()
+	void Arm_Down()
+	{
+		Arm_floor.Set(DoubleSolenoid::kForward);
+		Arm_peg.Set(DoubleSolenoid::kForward);
+		Wait(0.05);
+	}
+//autonomous procedures below
+	void initializeRobot()
 	{
 
 	}
+	void Peg_Left()
+	{
+		Drive(111);
+		Turn(45);
+		//Drive(x);
 
+	}
+	void Peg_Center()
+	{
+		Drive(111);
+		Arm_Mid();
+		Drive(-10);
+	}
+	void Peg_Right()
+	{
+
+	}
 	void Autonomous()
 	{
-	//	Drive(20);
-	//	Drive(20);
+
 	Turn(90);
-	/*
-	 	SetSpeed(1.0);
-		Wait(3.0);
-		SetSpeed(0.0);
-	*/
+
 
 
 	}
