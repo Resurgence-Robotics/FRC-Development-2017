@@ -214,6 +214,11 @@ public:
 		}
 	void GyroTurn()
 	{
+		while(IsAutonomous())
+		{
+			printf("\n GyroValue:%f",gyro.GetAngle());
+			Wait(0.001);
+		}
 
 	}
 	// functions for arm
@@ -260,8 +265,8 @@ public:
 	void Autonomous()
 	{
 
-	Turn(90);
-
+	//Turn(90);
+	GyroTurn();
 
 
 	}
