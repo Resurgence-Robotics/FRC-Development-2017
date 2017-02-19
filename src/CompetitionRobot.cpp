@@ -293,7 +293,7 @@ public:
 	{
 		Funnel.Set(DoubleSolenoid::kReverse);
 		Arm_Up();
-		Drive(99);
+		Drive(102);
 		Wait(1.50);
 		GyroTurnRight(47);
 		Drive(34);
@@ -320,7 +320,7 @@ public:
 	{
 		Funnel.Set(DoubleSolenoid::kReverse);
 		Arm_Up();
-		Drive(99);
+		Drive(102);
 		Wait(1.50);
 		GyroTurnLeft(47);
 		Drive(32);
@@ -333,7 +333,7 @@ public:
 	}
 	void Autonomous()
 	{
-		Peg_Right();
+		Peg_Left();
 	 //change
 	//GyroTurnRight(45);
 	//Drive(10);
@@ -387,23 +387,7 @@ public:
 //							Right2.Set(0.0);
 //						}
 				float kp = 0.003;
-				float HZ =24.0;  // Hertz= actions per second
-				if(timeElapsed<1/HZ)
-				{
-					LightRed->Set(Relay::Value::kOff);
-					LightBlue->Set(Relay::Value::kForward);
-				}
-				else if(timeElapsed < 2/HZ && timeElapsed > 1/HZ)
-				{
-					LightBlue->Set(Relay::Value::kOff);
-					LightRed->Set(Relay::Value::kForward);
 
-				}
-				else
-				{
-					timeElapsed=0;
-					gyro.Reset();
-				}
 
 				float JvalY=-1*stick1.GetY();//+up
 				float JvalX=stick1.GetX();//+right
@@ -457,10 +441,38 @@ public:
 					}
 					if(Funnel_Cycle==1)
 					{
+						timeElapsed= timeElapsed - 0.001;
 						Funnel.Set(DoubleSolenoid::kForward);
+						LightRed->Set(Relay::Value::kOff);
+						LightGreen->Set(Relay::Value::kForward);
+						LightBlue->Set(Relay::Value::kOff);
+
 						Wait(0.05);//extend
 					}else if(Funnel_Cycle==0)
 					{
+						float HZ =80.0;  // Hertz= actions per second
+						if(timeElapsed<1/HZ)
+						{
+
+							LightRed->Set(Relay::Value::kOff);
+							LightGreen->Set(Relay::Value::kOff);
+							LightBlue->Set(Relay::Value::kForward);
+
+						}
+						else if(timeElapsed < 2/HZ && timeElapsed > 1/HZ)
+						{
+							LightRed->Set(Relay::Value::kForward);
+							LightGreen->Set(Relay::Value::kOff);
+							LightBlue->Set(Relay::Value::kOff);
+
+
+						}
+						else
+						{
+							timeElapsed=0;
+
+							//gyro.Reset();
+						}
 						Funnel.Set(DoubleSolenoid::kReverse);
 						Wait(0.05);//retract
 					}else if(Funnel_Cycle==2)
