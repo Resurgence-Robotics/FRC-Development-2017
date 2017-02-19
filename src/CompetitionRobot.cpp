@@ -31,9 +31,6 @@ class Robot: public SampleRobot
 	DoubleSolenoid Arm_peg;
 	Encoder *Renc;
 	Encoder *Lenc;
-	Relay *LightRed;
-	Relay *LightBlue;
-	Relay *LightGreen;
 
 
 
@@ -47,7 +44,7 @@ public:
 			Left2(1),
 			Right1(2),
 			Right2(3),
-			Lift(6),//port may change
+			Lift(5),//port may change
 			Gripper(0,4),
 			Funnel(2,6),
 			Arm_floor(1,5),
@@ -59,10 +56,6 @@ public:
 		m_pdp =new PowerDistributionPanel();
 		Renc= new Encoder(2,3, true, Encoder::EncodingType::k4X);//both encoders counting forward.
 		Lenc= new Encoder(0,1, true, Encoder::EncodingType::k4X);
-		LightRed= new Relay(0);
-		LightGreen= new Relay(1);
-		LightBlue= new Relay(2);
-
 		gyro.Calibrate();
 		printf("\n gyro Calibrating...");
 		Wait(0.005);//allow gyro to calibrate
@@ -220,7 +213,7 @@ public:
 //			}
 			return;
 		}
-	void GyroTurnRight(int angle)
+	void GyroTurnRight()
 	{
 		float speed= 0.25;
 		// for testing the gyro value
@@ -234,11 +227,8 @@ public:
 
 // 90 to the right is +90
 //90 to the left is -90
-		gyro.Reset();
-		Wait(0.1);
-
-
-		while (gyro.GetAngle()<angle) //turn right 45 degrees  Tested 2/18- works; to go 90 degrees set it to 84
+		gyro.Calibrate();
+		while (gyro.GetAngle()<45) //turn right 45 degrees  Tested 2/18- works; to go 90 degrees set it to 84
 		{
 			SetSpeed(-speed,speed);
 		}
@@ -246,14 +236,12 @@ public:
 
 	}
 	// functions for arm
-	void GyroTurnLeft(int angle)
+	void GyroTurnLeft()
 	{
 		float speed= 0.25;
 
-		gyro.Reset();
-		Wait(0.1);
-
-		while (gyro.GetAngle()> (-1*angle)) //turn left 45 degrees
+		gyro.Calibrate();
+		while (gyro.GetAngle()>-45) //turn left 45 degrees
 		{
 			SetSpeed(speed,-speed);
 		}
@@ -262,84 +250,51 @@ public:
 	}
 	void Arm_Up()
 	{
-		Arm_floor.Set(DoubleSolenoid::kForward);
-		Arm_peg.Set(DoubleSolenoid::kForward);
+		Arm_floor.Set(DoubleSolenoid::kReverse);
+		Arm_peg.Set(DoubleSolenoid::kReverse);
 		Wait(0.05);
-		Gripper.Set(DoubleSolenoid::kReverse);
 	}
 	void Arm_Mid()
 	{
 		Arm_floor.Set(DoubleSolenoid::kForward);
 		Arm_peg.Set(DoubleSolenoid::kReverse);
-		Wait(0.25);
-		Gripper.Set(DoubleSolenoid::kForward);//open gripper
 		Wait(0.05);
 	}
 	void Arm_Down()
 	{
-		Arm_floor.Set(DoubleSolenoid::kReverse);
-		Arm_peg.Set(DoubleSolenoid::kReverse);
+		Arm_floor.Set(DoubleSolenoid::kForward);
+		Arm_peg.Set(DoubleSolenoid::kForward);
 		Wait(0.05);
 	}
 //autonomous procedures below
 	void initializeRobot()
 	{
 
-		Arm_Up();
-		Gripper.Set(DoubleSolenoid::kReverse); //close gripper
-		Funnel.Set(DoubleSolenoid::kReverse); // close funnel
 	}
 	void Peg_Left()
 	{
-		Funnel.Set(DoubleSolenoid::kReverse);
-		Arm_Up();
-		Drive(99);
-		Wait(1.50);
-		GyroTurnRight(47);
-		Drive(34);
-		Wait(1.50);
-		Arm_Mid();
-		Drive(-20);
-		Funnel.Set(DoubleSolenoid::kForward);
-		Arm_Up();
-
-
+		Drive(111);
+		Turn(45);
 		//Drive(x);
 
 	}
-	void Peg_Center()// tested- working
+	void Peg_Center()
 	{
-		Arm_Up();
-		Drive(85);  //change 100-(10)
-		Wait(1.50);
+		Drive(111);
 		Arm_Mid();
-		Drive(-20);
-		Funnel.Set(DoubleSolenoid::kForward);
+		Drive(-10);
 	}
 	void Peg_Right()
 	{
-		Funnel.Set(DoubleSolenoid::kReverse);
-		Arm_Up();
-		Drive(99);
-		Wait(1.50);
-		GyroTurnLeft(47);
-		Drive(32);
-		Wait(1.50);
-		Arm_Mid();
-		Drive(-20);
-		Funnel.Set(DoubleSolenoid::kForward);
-		Arm_Up();
 
 	}
 	void Autonomous()
 	{
-		Peg_Right();
-	 //change
-	//GyroTurnRight(45);
-	//Drive(10);
 
+	//Drive(111);
+	//GyroTurnLeft();
 
-		//Arm_floor.Set(DoubleSolenoid::kForward);
+		Arm_floor.Set(DoubleSolenoid::kForward);
 		//Arm_peg.Set(DoubleSolenoid::kForward);
 		//Wait(0.05);
 		//Gripper.Set(DoubleSolenoid::kReverse);
@@ -387,57 +342,37 @@ public:
 //							Right2.Set(0.0);
 //						}
 				float kp = 0.003;
-				float HZ =24.0;  // Hertz= actions per second
-				if(timeElapsed<1/HZ)
+				if(timeElapsed>=0.125)
 				{
-					LightRed->Set(Relay::Value::kOff);
-					LightBlue->Set(Relay::Value::kForward);
+					gyro.Reset();
+					printf("\n gyroReset");
+					timeElapsed=0;
 				}
-				else if(timeElapsed < 2/HZ && timeElapsed > 1/HZ)
-				{
-					LightBlue->Set(Relay::Value::kOff);
-					LightRed->Set(Relay::Value::kForward);
+				float JvalY=-1*stick1.GetY();//+up
+				float JvalX=stick1.GetX();//+right
 
+				//							Right2.Set(0.0);
+				if(JvalY>0) //if Jval is positive
+				{
+					direction=-1;
+				}
+				else if(JvalY<0) //if Jval is negative
+				{
+					direction=1;
+				}
+
+				if((JvalY> threshhold) || (JvalY< -threshhold))//forward and backwards
+				{
+					DriveFRC(JvalY, kp*direction*gyro.GetAngle());
+				}
+				else if(JvalX> threshhold || (JvalX< -threshhold))//turning
+				{
+					SetSpeed(((JvalY-JvalX)/2),(JvalY+JvalX)/2);
 				}
 				else
 				{
-					timeElapsed=0;
-					gyro.Reset();
+					SetSpeed(STOP);
 				}
-
-				float JvalY=-1*stick1.GetY();//+up
-				float JvalX=stick1.GetX();//+right
-				float Scale =0.25;
-				float RightOutput= (JvalY - (Scale * (JvalX)));
-				float LeftOutput = (JvalY + (Scale * (JvalX)));
-				printf("\n RightValue:%f", RightOutput);
-				printf("\n LeftValue: %f", LeftOutput);
-				printf("\n X:%f", JvalX);
-				printf("\n Y:%f", JvalY);
-
-				SetSpeed(RightOutput,LeftOutput);
-				//							Right2.Set(0.0);
-//				if(JvalY>0) //if Jval is positive
-//				{
-//					direction=-1;
-//				}
-//				else if(JvalY<0) //if Jval is negative
-//				{
-//					direction=1;
-//				}
-//
-//				if((JvalY> threshhold) || (JvalY< -threshhold))//forward and backwards
-//				{
-//					DriveFRC(JvalY, kp*direction*gyro.GetAngle());
-//				}
-//				else if(JvalX> threshhold || (JvalX< -threshhold))//turning
-//				{
-//					SetSpeed(((JvalY-JvalX)/2),(JvalY+JvalX)/2);
-//				}
-//				else
-//				{
-//					SetSpeed(STOP);
-//				}
 
 
 		//Driver2
@@ -470,11 +405,11 @@ public:
 			//lift
 			if(Gamepad.GetRawButton(6))  //lift intake up- right bumper
 			{
-				Lift.Set(1);
+				Lift.Set(0.75);
 			}
 			else if(Gamepad.GetRawButton(5))   //lift outtake down- left bumper
 			{
-				Lift.Set(1);
+				Lift.Set(-0.75);
 			}
 			else //stop lift
 			{
@@ -501,23 +436,23 @@ public:
 		   if ((Gamepad.GetRawButton(4))||(stick1.GetRawButton(4)))//gear arm up- (both open) Right hand 4; Y button
 		   {
 			   Arm_floor.Set(DoubleSolenoid::kForward);
-			   Arm_peg.Set(DoubleSolenoid::kForward);
+			   Arm_peg.Set(DoubleSolenoid::kReverse);
 			   Wait(0.05);
-			   Gripper.Set(DoubleSolenoid::kReverse);//close gripper
+			   Gripper.Set(DoubleSolenoid::kForward);//close gripper
 			   Wait(0.05);
 		   }
 		   else if((Gamepad.GetRawButton(3))||(stick1.GetRawButton(6))) //gear arm middle- (one open, one closed) Right hand 6; B button
 		   {
-			   Arm_floor.Set(DoubleSolenoid::kReverse);
+			   Arm_floor.Set(DoubleSolenoid::kForward);
 			   Arm_peg.Set(DoubleSolenoid::kForward);
 			   Wait(0.05);
-			   Gripper.Set(DoubleSolenoid::kForward);//open gripper
+			   Gripper.Set(DoubleSolenoid::kReverse);//open gripper
 			   Wait(0.05);
 		   }
 		   else if ((Gamepad.GetRawButton(2))||(stick1.GetRawButton(2)))  //gear arm down- (both closed) Right hand 2; A button toggle
 		   {
 			   Arm_floor.Set(DoubleSolenoid::kReverse);
-			   Arm_peg.Set(DoubleSolenoid::kReverse); //changed this
+			   Arm_peg.Set(DoubleSolenoid::kForward); //changed this
 			   Wait(0.05);
 		   }
 		   else //close gear
