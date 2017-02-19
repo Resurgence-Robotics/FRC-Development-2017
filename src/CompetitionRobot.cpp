@@ -4,13 +4,9 @@
 #define leftY 1
 #define rightY 3
 #define STOP 0.0
-long Map(float x, float in_min, float in_max, float out_min, float out_max){
-	// use this function to match two value's scales proportionally
-	return ((x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min);
-}
 int Funnel_Cycle=2;//initializing variable for funnel position
 bool pressed=false;
-
+using namespace std;
 class Robot: public SampleRobot
 {
 	//NEED TO UPDATE ECLIPESE! 2/17
@@ -61,7 +57,23 @@ public:
 		Wait(0.005);//allow gyro to calibrate
 		printf("\n gyro:%f", gyro.GetAngle());
 	}
-
+// math functions
+	float Map(float x, float in_min, float in_max, float out_min, float out_max){
+		// use this function to match two value's scales proportionally
+		return ((x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min);
+	}
+	float Limit(float num)
+	  {
+	           if (num > 1.0)
+	           {
+	                   return 1.0;
+	           }
+	           if (num < -1.0)
+	           {
+	                   return -1.0;
+	           }
+	           return num;
+	   }
 //functions for drivetrain
 	void SetSpeed(float Rspeed, float Lspeed)					// tested --working on final
 	{
@@ -235,6 +247,42 @@ public:
 		SetSpeed(STOP);
 
 	}
+	void Arcade(float moveValue, float rotateValue)// untested
+		{
+
+		         float leftMotorOutput;
+		         float rightMotorOutput;
+
+		           moveValue = Limit(moveValue);
+		           rotateValue = Limit(rotateValue);
+		           if (moveValue > 0.0)
+		           {
+		                   if (rotateValue > 0.0)
+		                   {
+		                           leftMotorOutput = moveValue - rotateValue;
+		                           rightMotorOutput = max(moveValue, rotateValue);
+		                   }
+		                   else
+		                   {
+		                           leftMotorOutput = max(moveValue, -rotateValue);
+		                           rightMotorOutput = moveValue + rotateValue;
+		                   }
+		           }
+		           else
+		           {
+		                   if (rotateValue > 0.0)
+		                   {
+		                           leftMotorOutput = - max(-moveValue, rotateValue);
+		                           rightMotorOutput = moveValue + rotateValue;
+		                   }
+		                   else
+		                   {
+		                           leftMotorOutput = moveValue - rotateValue;
+		                           rightMotorOutput = - max(-moveValue, -rotateValue);
+		                   }
+		           }
+		           SetSpeed(rightMotorOutput, leftMotorOutput);
+		   }
 	// functions for arm
 	void GyroTurnLeft()
 	{
@@ -310,38 +358,73 @@ public:
 	{
 		float threshhold= 0.10;
 		float timeElapsed=0;
+		float loopTime=0.001;
 		int direction =0;
 		gyro.Reset();
 		while(IsOperatorControl() && IsEnabled())
 		{
-
+			 timeElapsed= timeElapsed + loopTime;
 		//Driver1
+
+
 			//drivetrain
-				//tank drive with threshold
-//						printf("\nLeft:%f",stick2.GetY());
-//						if ((stick2.GetY()> threshhold) || (stick2.GetY()< -threshhold))
-//						{
-//							printf("\nY:%f",stick2.GetY());
-//							Left1.Set(-stick2.GetY());
-//							Left2.Set(-stick2.GetY());
-//						}
-//						else
-//						{
-//							Left1.Set(0.0);
-//							Left2.Set(0.0);
-//						}
-//						printf("\nRight:%f",stick1.GetY());
-//						if ((stick1.GetY()> threshhold)|| (stick1.GetY()< -threshhold))
-//						{
-//							Right1.Set (stick1.GetY());
-//							Right2.Set (stick1.GetY());
-//						}
-//						else
-//						{
-//							Right1.Set(0.0);
-//							Right2.Set(0.0);
-//						}
-				float kp = 0.003;
+
+
+			 	 float JvalY=-1*stick1.GetY();//+up
+			 	 float JvalX=stick1.GetX();//+right
+			 	 float kp = 0.003;
+
+				 if(JvalY>=0) //if Jval is positive
+				 {
+					 direction=-1;
+				 }
+				 else if(JvalY<0) //if Jval is negative
+				 {
+					 direction=1;
+				 }
+
+			 	 if(JvalX> threshhold||JvalX< -threshhold)//turning and driving
+			 	 {
+			 		 Arcade(JvalY, JvalX);//nicely scaled
+			 	 }
+			 	 else if(JvalY> threshhold||JvalY< -threshhold)// go in straight line only
+			 	 {
+			 		 DriveFRC(JvalY, kp*direction*gyro.GetAngle());
+			 	 }
+			 	 else
+			 	 {
+			 		 SetSpeed(STOP);
+			 	 }
+				/*
+				 * tank drive with threshold
+						printf("\nLeft:%f",stick2.GetY());
+						if ((stick2.GetY()> threshhold) || (stick2.GetY()< -threshhold))
+						{
+							printf("\nY:%f",stick2.GetY());
+							Left1.Set(-stick2.GetY());
+							Left2.Set(-stick2.GetY());
+						}
+						else
+						{
+							Left1.Set(0.0);
+							Left2.Set(0.0);
+						}
+						printf("\nRight:%f",stick1.GetY());
+						if ((stick1.GetY()> threshhold)|| (stick1.GetY()< -threshhold))
+						{
+							Right1.Set (stick1.GetY());
+							Right2.Set (stick1.GetY());
+						}
+						else
+						{
+							Right1.Set(0.0);
+							Right2.Set(0.0);
+						}
+						*/
+				/*
+				 * arcade drive with gyro unscaled
+			 	 float kp = 0.003;
+			 	  timeElapsed= timeElapsed + loopTime;
 				if(timeElapsed>=0.125)
 				{
 					gyro.Reset();
@@ -373,11 +456,9 @@ public:
 				{
 					SetSpeed(STOP);
 				}
-
-
+				 */
 		//Driver2
 			//funnel
-
 					if(Gamepad.GetRawButton(1)){ // when we press the switch for the first time,
 							if(!pressed) { // set as pressed
 								if(Funnel_Cycle==1) { // when we press it again, it gets turned off
@@ -460,8 +541,7 @@ public:
 			   Arm_floor.Set(DoubleSolenoid::kOff);
 			   Arm_peg.Set(DoubleSolenoid::kOff);
 		   }
-		   timeElapsed= timeElapsed + 0.001;
-		  Wait(0.001);
+		  Wait(loopTime);
 		}
 	}
 };
