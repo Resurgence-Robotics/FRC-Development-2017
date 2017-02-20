@@ -484,9 +484,9 @@ public:
 			{
 				Lift.Set(1);
 			}
-			else if(Gamepad.GetRawButton(5))   //lift outtake down- left bumper
+			else if(Gamepad.GetRawButton(5)&&(Gamepad.GetRawButton(9)))   //lift outtake down- left bumper and back button
 			{
-				Lift.Set(1);
+				Lift.Set(-1);
 			}
 			else //stop lift
 			{
