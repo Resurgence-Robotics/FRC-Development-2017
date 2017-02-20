@@ -353,7 +353,7 @@ public:
 	}
 	void OperatorControl()
 	{
-		float threshhold= 0.10;
+		float threshold= 0.08;
 		float timeElapsed=0;
 		int direction =0;
 		gyro.Reset();
@@ -362,67 +362,29 @@ public:
 
 		//Driver1
 			//drivetrain
-				//tank drive with threshold
-//						printf("\nLeft:%f",stick2.GetY());
-//						if ((stick2.GetY()> threshhold) || (stick2.GetY()< -threshhold))
-//						{
-//							printf("\nY:%f",stick2.GetY());
-//							Left1.Set(-stick2.GetY());
-//							Left2.Set(-stick2.GetY());
-//						}
-//						else
-//						{
-//							Left1.Set(0.0);
-//							Left2.Set(0.0);
-//						}
-//						printf("\nRight:%f",stick1.GetY());
-//						if ((stick1.GetY()> threshhold)|| (stick1.GetY()< -threshhold))
-//						{
-//							Right1.Set (stick1.GetY());
-//							Right2.Set (stick1.GetY());
-//						}
-//						else
-//						{
-//							Right1.Set(0.0);
-//							Right2.Set(0.0);
-//						}
-				float kp = 0.003;
-
 
 				float JvalY=-1*stick1.GetY();//+up
 				float JvalX=stick1.GetX();//+right
+				float JvalZ=stick1.GetZ(); //turing when not moving
 				float Scale =0.25;
 				float RightOutput= (JvalY - (Scale * (JvalX)));
 				float LeftOutput = (JvalY + (Scale * (JvalX)));
+				float RotateOutput= (JvalZ * Scale);
 				printf("\n RightValue:%f", RightOutput);
 				printf("\n LeftValue: %f", LeftOutput);
 				printf("\n X:%f", JvalX);
 				printf("\n Y:%f", JvalY);
+				printf("\n Z:%f", JvalZ);
 
-				SetSpeed(RightOutput,LeftOutput);
-				//							Right2.Set(0.0);
-//				if(JvalY>0) //if Jval is positive
-//				{
-//					direction=-1;
-//				}
-//				else if(JvalY<0) //if Jval is negative
-//				{
-//					direction=1;
-//				}
-//
-//				if((JvalY> threshhold) || (JvalY< -threshhold))//forward and backwards
-//				{
-//					DriveFRC(JvalY, kp*direction*gyro.GetAngle());
-//				}
-//				else if(JvalX> threshhold || (JvalX< -threshhold))//turning
-//				{
-//					SetSpeed(((JvalY-JvalX)/2),(JvalY+JvalX)/2);
-//				}
-//				else
-//				{
-//					SetSpeed(STOP);
-//				}
+				if(JvalY > threshold || JvalY < -threshold)//we not movin yall
+				{
+					SetSpeed(-1*(RotateOutput), RotateOutput);  //twist and shout
 
+				}
+				else if (JvalY < threshold || JvalY > -threshold)//if we movin yall
+				{
+				SetSpeed(RightOutput,LeftOutput);//keep it stright
+				}
 
 		//Driver2
 			//funnel
