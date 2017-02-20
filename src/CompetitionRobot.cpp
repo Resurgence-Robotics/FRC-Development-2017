@@ -302,6 +302,9 @@ public:
 		Drive(-20);
 		Funnel.Set(DoubleSolenoid::kForward);
 		Arm_Up();
+		GyroTurnLeft(47);
+		Drive(300);
+
 
 
 		//Drive(x);
@@ -315,6 +318,12 @@ public:
 		Arm_Mid();
 		Drive(-20);
 		Funnel.Set(DoubleSolenoid::kForward);
+		//below this not tested
+		Drive(-30);
+		GyroTurnRight(90);
+		Drive(40);
+		GyroTurnLeft(90);
+		Drive(300);
 	}
 	void Peg_Right()
 	{
@@ -329,11 +338,13 @@ public:
 		Drive(-20);
 		Funnel.Set(DoubleSolenoid::kForward);
 		Arm_Up();
+		GyroTurnRight(47);
+		Drive(300);
 
 	}
 	void Autonomous()
 	{
-		Peg_Left();
+		Peg_Right();
 	 //change
 	//GyroTurnRight(45);
 	//Drive(10);
