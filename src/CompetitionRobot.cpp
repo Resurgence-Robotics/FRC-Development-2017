@@ -353,7 +353,7 @@ public:
 	}
 	void OperatorControl()
 	{
-		float threshold= 0.08;
+
 		float timeElapsed=0;
 		int direction =0;
 		gyro.Reset();
@@ -362,29 +362,34 @@ public:
 
 		//Driver1
 			//drivetrain
-
+				float threshold= 0.08;
 				float JvalY=-1*stick1.GetY();//+up
 				float JvalX=stick1.GetX();//+right
-				float JvalZ=stick1.GetZ(); //turing when not moving
+				float JvalZ=stick1.GetRawAxis(3); //turing when not moving
 				float Scale =0.25;
 				float RightOutput= (JvalY - (Scale * (JvalX)));
 				float LeftOutput = (JvalY + (Scale * (JvalX)));
 				float RotateOutput= (JvalZ * Scale);
-				printf("\n RightValue:%f", RightOutput);
-				printf("\n LeftValue: %f", LeftOutput);
 				printf("\n X:%f", JvalX);
 				printf("\n Y:%f", JvalY);
 				printf("\n Z:%f", JvalZ);
+				printf("\n RightValue:%f", RightOutput);
+				printf("\n LeftValue: %f", LeftOutput);
 
-				if(JvalY > threshold || JvalY < -threshold)//we not movin yall
-				{
-					SetSpeed(-1*(RotateOutput), RotateOutput);  //twist and shout
 
-				}
-				else if (JvalY < threshold || JvalY > -threshold)//if we movin yall
+					//SetSpeed((-1*RotateOutput), RotateOutput);  //twist and shout
+
+
+				if(JvalY > threshold || JvalY < (-1*threshold))
 				{
-				SetSpeed(RightOutput,LeftOutput);//keep it stright
+					SetSpeed(RightOutput,LeftOutput);//keep it stright
 				}
+				else
+				{
+					//SetSpeed(STOP);
+					SetSpeed((-1*RotateOutput), RotateOutput);  //twist and shout
+				}
+
 
 		//Driver2
 			//funnel
