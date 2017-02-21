@@ -13,7 +13,6 @@ bool pressed=false;
 
 class Robot: public SampleRobot
 {
-	//NEED TO UPDATE ECLIPESE! 2/17
 	//intialize class members here
 	PowerDistributionPanel *m_pdp;
 	ADXRS450_Gyro gyro;
@@ -34,6 +33,8 @@ class Robot: public SampleRobot
 	Relay *LightRed;
 	Relay *LightBlue;
 	Relay *LightGreen;
+	AnalogInput Mode_Pot;
+	DigitalInput Auto_Sw;
 
 
 
@@ -51,8 +52,9 @@ public:
 			Gripper(0,4),
 			Funnel(2,6),
 			Arm_floor(1,5),
-			Arm_peg(3,7)
-
+			Arm_peg(3,7),
+			Mode_Pot(0),
+			Auto_Sw(9)
 
 	{
 
@@ -291,52 +293,41 @@ public:
 	}
 	void Peg_Left()
 	{
-		Funnel.Set(DoubleSolenoid::kReverse);
-		Arm_Up();
+		initializeRobot();
 		Drive(102);
 		Wait(1.50);
 		GyroTurnRight(47);
 		Drive(34);
 		Wait(1.50);
 		Arm_Mid();
-		Drive(-20);
-		Funnel.Set(DoubleSolenoid::kForward);
+		Drive(-34);
 		Arm_Up();
 		GyroTurnLeft(47);
 		Drive(300);
-
-
-
-		//Drive(x);
-
 	}
 	void Peg_Center()// tested- working
 	{
-		Arm_Up();
+		initializeRobot();
 		Drive(85);  //change 100-(10)
 		Wait(1.50);
 		Arm_Mid();
-		Drive(-20);
-		Funnel.Set(DoubleSolenoid::kForward);
 		//below this not tested
-		Drive(-30);
+		Drive(-50);
 		GyroTurnRight(90);
-		Drive(40);
+		Drive(70);
 		GyroTurnLeft(90);
 		Drive(300);
 	}
 	void Peg_Right()
 	{
-		Funnel.Set(DoubleSolenoid::kReverse);
-		Arm_Up();
+		initializeRobot();
 		Drive(102);
 		Wait(1.50);
 		GyroTurnLeft(47);
 		Drive(32);
 		Wait(1.50);
 		Arm_Mid();
-		Drive(-20);
-		Funnel.Set(DoubleSolenoid::kForward);
+		Drive(-32);
 		Arm_Up();
 		GyroTurnRight(47);
 		Drive(300);
@@ -344,23 +335,52 @@ public:
 	}
 	void Autonomous()
 	{
-		Peg_Right();
-	 //change
-	//GyroTurnRight(45);
-	//Drive(10);
+		int Auto_Sel=Map(Mode_Pot.GetVoltage(), 0, 5, 1, 12);
+		printf("SW:%i\n", Auto_Sw.Get());
+		printf("Mode:%i \n", Auto_Sel);
 
+		if (Auto_Sw.Get()==true)
+		{
+			if (Auto_Sel==1)
+			{
+				LightRed->Set(Relay::Value::kOff);
+				LightGreen->Set(Relay::Value::kForward);
+				LightBlue->Set(Relay::Value::kOff);
 
-		//Arm_floor.Set(DoubleSolenoid::kForward);
-		//Arm_peg.Set(DoubleSolenoid::kForward);
-		//Wait(0.05);
-		//Gripper.Set(DoubleSolenoid::kReverse);
+				Peg_Left();
+			}
+			else if (Auto_Sel==2)
+			{
+				LightRed->Set(Relay::Value::kOff);
+				LightGreen->Set(Relay::Value::kForward);
+				LightBlue->Set(Relay::Value::kOff);
 
+				Peg_Center();
+			}
+			else if (Auto_Sel==3)
+			{
+				LightRed->Set(Relay::Value::kOff);
+				LightGreen->Set(Relay::Value::kForward);
+				LightBlue->Set(Relay::Value::kOff);
 
-	//Drive(-10);
+				Peg_Right();
+			}
+			else
+			{
+				LightRed->Set(Relay::Value::kForward);
+				LightGreen->Set(Relay::Value::kOff);
+				LightBlue->Set(Relay::Value::kOff);
 
+			}
+		}
 
+		else
+		{
+			LightRed->Set(Relay::Value::kForward);
+			LightGreen->Set(Relay::Value::kOff);
+			LightBlue->Set(Relay::Value::kOff);
 
-
+		}
 	}
 	void OperatorControl()
 	{
@@ -380,17 +400,12 @@ public:
 				float Scale =0.25;
 				float RightOutput= (JvalY - (Scale * (JvalX)));
 				float LeftOutput = (JvalY + (Scale * (JvalX)));
-				float RotateOutput= (JvalZ * Scale);
+				float RotateOutput= (JvalZ * 0.375);
 				printf("\n X:%f", JvalX);
 				printf("\n Y:%f", JvalY);
 				printf("\n Z:%f", JvalZ);
 				printf("\n RightValue:%f", RightOutput);
 				printf("\n LeftValue: %f", LeftOutput);
-
-
-					//SetSpeed((-1*RotateOutput), RotateOutput);  //twist and shout
-
-
 				if(JvalY > threshold || JvalY < (-1*threshold))
 				{
 					SetSpeed(RightOutput,LeftOutput);//keep it stright
