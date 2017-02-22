@@ -33,8 +33,8 @@ class Robot: public SampleRobot
 	Relay *LightRed;
 	Relay *LightBlue;
 	Relay *LightGreen;
-	AnalogInput Mode_Pot;
-	DigitalInput Auto_Sw;
+	AnalogInput Mode_Pot;  //used for autonomus
+	DigitalInput Auto_Sw;  //switch used for autonomus
 
 
 
@@ -44,7 +44,7 @@ public:
 			stick1(0),
 			stick2(1),
 			Gamepad(2),
-			Left1(0),
+			Left1(0),  //ports in the roboRIO
 			Left2(1),
 			Right1(2),
 			Right2(3),
@@ -61,11 +61,11 @@ public:
 		m_pdp =new PowerDistributionPanel();
 		Renc= new Encoder(2,3, true, Encoder::EncodingType::k4X);//both encoders counting forward.
 		Lenc= new Encoder(0,1, true, Encoder::EncodingType::k4X);
-		LightRed= new Relay(0);
+		LightRed= new Relay(0);  //for the LED lights
 		LightGreen= new Relay(1);
 		LightBlue= new Relay(2);
 
-		gyro.Calibrate();
+		gyro.Calibrate();  //calibrate the gyro
 		printf("\n gyro Calibrating...");
 		Wait(0.005);//allow gyro to calibrate
 		printf("\n gyro:%f", gyro.GetAngle());
@@ -81,7 +81,7 @@ public:
 	}
 	void SetSpeed(float speed)									// tested --working on final
 	{
-		SetSpeed(speed, speed);
+		SetSpeed(speed, speed);  //(-)Right, (+) Left
 	}
 	void DriveFRC(float outputMagnitude, float curve)			// tested --working on final
 		{
@@ -141,7 +141,7 @@ public:
 			DriveFRC(0.0,0.0);
 		}
 	void Drive(float distance)									// tested --working on final( +- 3/8 in)
-
+//used to drive straight with encoders (measured in inches)
 		{
 			float wheel_radius =2.4;
 			float wheel_circumference = 2*M_PI*wheel_radius;
@@ -155,7 +155,7 @@ public:
 			drivestraightwithencoders(Target, 0.25);
 
 		}
-	void Turn (float angle)										//needs to be tested must be within 1 degree consistently
+	void Turn (float angle)				//needs to be tested must be within 1 degree consistently
 		{
 
 			int approachSpeed = 0.25/3;
@@ -173,12 +173,12 @@ public:
 			printf("\n arch: %i", arch);
 			printf("\n target: %f", target);
 			printf("\n Encoders Reset");  //\n is new line
-			Lenc->Reset();
+			Lenc->Reset(); //reset the encoder
 			Renc->Reset();
 			printf("\n Renc: %i", Renc->Get());
 			if (angle>0)
 			{
-				printf("\n Turning_Right");
+				printf("\n Turning_Right");  //using approach to turn so that robot does not overshoot the target(where we are trying to go) and keep going back and forth, instead it approaches it slowly.
 				while(-1*Renc->Get()<target)//turn right
 				{
 					float error =target- (-1*Renc->Get());
@@ -204,36 +204,12 @@ public:
 				//yet to be written
 				printf("\n Turning_Left");
 			}
-//			else if (angle<0)
-//			{
-//				while (Renc->Get()< approach ) //go slow
-//					{
-//					SetSpeed (-approachSpeed,approachSpeed);//tunr left
-//					}
-//				while (Renc->Get()> approach )
-//					{
-//					SetSpeed(speed, -speed);
-//					printf("\n Renc: %i", Renc->Get());
-//					Wait(0.005);
-//					}
-//
-//					SetSpeed(STOP);
-//
-//			}
 			return;
 		}
 	void GyroTurnRight(int angle)
 	{
 		float speed= 0.25;
 		// for testing the gyro value
-		/*gyro.Calibrate();
-		while(IsAutonomous())
-		{
-			printf("\n GyroValue:%f",gyro.GetAngle());
-			Wait(0.001);
-		}
-		*/
-
 // 90 to the right is +90
 //90 to the left is -90
 		gyro.Reset();
@@ -264,34 +240,34 @@ public:
 	}
 	void Arm_Up()
 	{
-		Arm_floor.Set(DoubleSolenoid::kForward);
-		Arm_peg.Set(DoubleSolenoid::kForward);
+		Arm_floor.Set(DoubleSolenoid::kForward);		//arm is up
+		Arm_peg.Set(DoubleSolenoid::kForward); //both pneumatic cylinders are closed
 		Wait(0.05);
-		Gripper.Set(DoubleSolenoid::kReverse);
+		Gripper.Set(DoubleSolenoid::kReverse); //close gripper
 	}
 	void Arm_Mid()
 	{
-		Arm_floor.Set(DoubleSolenoid::kForward);
-		Arm_peg.Set(DoubleSolenoid::kReverse);
+		Arm_floor.Set(DoubleSolenoid::kForward); //floor pneumatic cylinder is closed //arm is at middle position
+		Arm_peg.Set(DoubleSolenoid::kReverse); //arm peg pneumatic cylinder is open
 		Wait(0.25);
 		Gripper.Set(DoubleSolenoid::kForward);//open gripper
 		Wait(0.05);
 	}
 	void Arm_Down()
 	{
-		Arm_floor.Set(DoubleSolenoid::kReverse);
-		Arm_peg.Set(DoubleSolenoid::kReverse);
+		Arm_floor.Set(DoubleSolenoid::kReverse);  //arm is down
+		Arm_peg.Set(DoubleSolenoid::kReverse); //both pneumatic cylinders are open
 		Wait(0.05);
 	}
 //autonomous procedures below
-	void initializeRobot()
+	void initializeRobot()  //initialization, use this before autonomus and Operator controll
 	{
 
 		Arm_Up();
 		Gripper.Set(DoubleSolenoid::kReverse); //close gripper
 		Funnel.Set(DoubleSolenoid::kReverse); // close funnel
 	}
-	void Peg_Left()
+	void Peg_Left()  //autonomus for putting the gear on the left peg
 	{
 		initializeRobot();
 		Drive(102);
@@ -299,7 +275,7 @@ public:
 		GyroTurnRight(47);
 		Drive(34);
 		Wait(1.50);
-		Arm_Mid();
+		Arm_Mid();  //dropping off the gear
 		Drive(-34);
 		Arm_Up();
 		GyroTurnLeft(47);
@@ -308,9 +284,9 @@ public:
 	void Peg_Center()// tested- working
 	{
 		initializeRobot();
-		Drive(85);  //change 100-(10)
+		Drive(85);
 		Wait(1.50);
-		Arm_Mid();
+		Arm_Mid(); //drop off gear
 		//below this not tested
 		Drive(-50);
 		GyroTurnRight(90);
@@ -326,7 +302,7 @@ public:
 		GyroTurnLeft(47);
 		Drive(32);
 		Wait(1.50);
-		Arm_Mid();
+		Arm_Mid(); //drop off gear
 		Drive(-32);
 		Arm_Up();
 		GyroTurnRight(47);
@@ -334,49 +310,49 @@ public:
 
 	}
 	void Autonomous()
-	{
-		int Auto_Sel=Map(Mode_Pot.GetVoltage(), 0, 5, 1, 12);
+	{ //for the autonomus switch- needs to be tested witht the printf
+		int Auto_Sel=Map(Mode_Pot.GetVoltage(), 0, 5, 1, 12);  //0 is the input min, 5 is the input max (5Volts), 1 is the output max, 12 is the output max
 		printf("SW:%i\n", Auto_Sw.Get());
 		printf("Mode:%i \n", Auto_Sel);
 
-		if (Auto_Sw.Get()==true)
+		if (Auto_Sw.Get()==true) //if we selected number 1,2, or 3 (it is true)
 		{
-			if (Auto_Sel==1)
+			if (Auto_Sel==1) //if it is position 1
 			{
-				LightRed->Set(Relay::Value::kOff);
-				LightGreen->Set(Relay::Value::kForward);
-				LightBlue->Set(Relay::Value::kOff);
+				LightRed->Set(Relay::Value::kOff); //turn the other lights off
+				LightGreen->Set(Relay::Value::kForward); //turn green light on
+				LightBlue->Set(Relay::Value::kOff); //put the lights in the same order thoughout the code!
 
-				Peg_Left();
+				Peg_Left(); //use peg left
 			}
-			else if (Auto_Sel==2)
+			else if (Auto_Sel==2)//if it is in position 2
 			{
 				LightRed->Set(Relay::Value::kOff);
-				LightGreen->Set(Relay::Value::kForward);
+				LightGreen->Set(Relay::Value::kForward);  //turn green light on
 				LightBlue->Set(Relay::Value::kOff);
 
-				Peg_Center();
+				Peg_Center(); //use peg center
 			}
 			else if (Auto_Sel==3)
 			{
 				LightRed->Set(Relay::Value::kOff);
-				LightGreen->Set(Relay::Value::kForward);
+				LightGreen->Set(Relay::Value::kForward); //turn the green light on
 				LightBlue->Set(Relay::Value::kOff);
 
 				Peg_Right();
 			}
-			else
+			else  //if we did not select any of the 3
 			{
-				LightRed->Set(Relay::Value::kForward);
-				LightGreen->Set(Relay::Value::kOff);
-				LightBlue->Set(Relay::Value::kOff);
+				LightRed->Set(Relay::Value::kForward);// turn the red light on
+				LightGreen->Set(Relay::Value::kOff);//turnt the other lights off
+				LightBlue->Set(Relay::Value::kOff);// do not do anything other than turning the light on
 
 			}
 		}
 
-		else
+		else  //if we are did not select an autonomus run
 		{
-			LightRed->Set(Relay::Value::kForward);
+			LightRed->Set(Relay::Value::kForward);  //turn the light red
 			LightGreen->Set(Relay::Value::kOff);
 			LightBlue->Set(Relay::Value::kOff);
 
@@ -397,29 +373,29 @@ public:
 				float JvalY=-1*stick1.GetY();//+up
 				float JvalX=stick1.GetX();//+right
 				float JvalZ=stick1.GetRawAxis(3); //turing when not moving
-				float Scale =0.25;
+				float Scale =0.25; //going at 25%power
 				float RightOutput= (JvalY - (Scale * (JvalX)));
 				float LeftOutput = (JvalY + (Scale * (JvalX)));
-				float RotateOutput= (JvalZ * 0.375);
+				float RotateOutput= (JvalZ * 0.375); //Zaxis //going at 37% power
 				printf("\n X:%f", JvalX);
 				printf("\n Y:%f", JvalY);
 				printf("\n Z:%f", JvalZ);
 				printf("\n RightValue:%f", RightOutput);
 				printf("\n LeftValue: %f", LeftOutput);
-				if(JvalY > threshold || JvalY < (-1*threshold))
+				if(JvalY > threshold || JvalY < (-1*threshold))  //if we are moving
 				{
 					SetSpeed(RightOutput,LeftOutput);//keep it stright
 				}
-				else
+				else //if we are not moving
 				{
-					//SetSpeed(STOP);
-					SetSpeed((-1*RotateOutput), RotateOutput);  //twist and shout
+
+					SetSpeed((-1*RotateOutput), RotateOutput);  //twist and shout (turn)
 				}
 
-
+	    //the button number is found by going to driver station, and pressing the button while controllers plugged into computer(it will light up green)
 		//Driver2
 			//funnel
-
+					//toggle
 					if(Gamepad.GetRawButton(1)){ // when we press the switch for the first time,
 							if(!pressed) { // set as pressed
 								if(Funnel_Cycle==1) { // when we press it again, it gets turned off
@@ -437,34 +413,28 @@ public:
 						timeElapsed= timeElapsed - 0.001;
 						Funnel.Set(DoubleSolenoid::kForward);
 						LightRed->Set(Relay::Value::kOff);
-						LightGreen->Set(Relay::Value::kForward);
+						LightGreen->Set(Relay::Value::kForward);  //when the funnel is open, turn the green light on
 						LightBlue->Set(Relay::Value::kOff);
 
 						Wait(0.05);//extend
 					}else if(Funnel_Cycle==0)
 					{
 						float HZ =80.0;  // Hertz= actions per second
-						if(timeElapsed<1/HZ)
+						if(timeElapsed<1/HZ) //every time the gyro resets, change the color of the lights
 						{
-
 							LightRed->Set(Relay::Value::kOff);
 							LightGreen->Set(Relay::Value::kOff);
 							LightBlue->Set(Relay::Value::kForward);
-
 						}
 						else if(timeElapsed < 2/HZ && timeElapsed > 1/HZ)
 						{
 							LightRed->Set(Relay::Value::kForward);
 							LightGreen->Set(Relay::Value::kOff);
 							LightBlue->Set(Relay::Value::kOff);
-
-
 						}
 						else
 						{
 							timeElapsed=0;
-
-							//gyro.Reset();
 						}
 						Funnel.Set(DoubleSolenoid::kReverse);
 						Wait(0.05);//retract
