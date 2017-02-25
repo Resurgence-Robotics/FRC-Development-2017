@@ -1,6 +1,8 @@
 #include "WPILib.h"
-#include "math.h"
 #include "CANTalon.h"
+#include "math.h"
+
+
 #define leftY 1
 #define rightY 3
 #define STOP 0.0
@@ -37,7 +39,6 @@ class Robot: public SampleRobot
 	DigitalInput Auto_Sw;  //switch used for autonomus
 
 
-
 public:
 	Robot() :
 		//initialize these in the same order they are instantiated (listed) above
@@ -64,13 +65,21 @@ public:
 		LightRed= new Relay(0);  //for the LED lights
 		LightGreen= new Relay(1);
 		LightBlue= new Relay(2);
+		CameraServer::GetInstance()->StartAutomaticCapture();
 
 		gyro.Calibrate();  //calibrate the gyro
 		printf("\n gyro Calibrating...");
 		Wait(0.005);//allow gyro to calibrate
 		printf("\n gyro:%f", gyro.GetAngle());
 	}
-
+// Miscellaneous functions
+	int RPM(int RPM, int NFeedback, float CPR, int Tolerance )
+	{
+		float kp=0.05;
+		float kd=0.005;
+		int MotorOutput;
+		return MotorOutput;
+	}
 //functions for drivetrain
 	void SetSpeed(float Rspeed, float Lspeed)					// tested --working on final
 	{
@@ -309,6 +318,8 @@ public:
 		Drive(300);
 
 	}
+
+
 	void Autonomous()
 	{ //for the autonomus switch- needs to be tested witht the printf
 		int Auto_Sel=Map(Mode_Pot.GetVoltage(), 0, 5, 1, 12);  //0 is the input min, 5 is the input max (5Volts), 1 is the output max, 12 is the output max
