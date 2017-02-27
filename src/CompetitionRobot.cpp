@@ -73,11 +73,44 @@ public:
 		printf("\n gyro:%f", gyro.GetAngle());
 	}
 // Miscellaneous functions
-	int RPM(int RPM, int NFeedback, float CPR, int Tolerance )
+	// math functions
+	float Map(float x, float in_min, float in_max, float out_min, float out_max){
+	        // use this function to match two value's scales proportionally
+	        return ((x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min);
+	    }
+	float Limit(float num)
 	{
+		   if (num > 1.0)
+		   {
+				   return 1.0;
+		   }
+		   if (num < -1.0)
+		   {
+				   return -1.0;
+		   }
+		   return num;
+	}
+	float Ponly_RPM(int RPM, int NFeedback, float CPR, float LoopTime)//should always be positive, accumulating inputs, run in a timed loop
+	{
+		//initialize variables
+		float MotorOutput=0;
 		float kp=0.05;
-		float kd=0.005;
-		int MotorOutput;
+		int Tolerance=5;
+		float nProcessValue=(NFeedback/CPR)/LoopTime*60;     //Instantaneous-ish RPM, arithmetic test to the right-> (30000counts/1000cpr)/(Xsec*(60sec/1min)) = (30rot)*(60sec)= 1800 rpm YAY!!
+		float nError=RPM-nProcessValue;
+
+			if(nError>1)
+			{
+				MotorOutput=1;//handles exception for motor capacity
+			}
+			else if(nError<0)
+			{
+				nError=0;//prevents us from oscillating around 0
+			}
+			else
+			{
+				MotorOutput=kp*nError;
+			}
 		return MotorOutput;
 	}
 //functions for drivetrain
