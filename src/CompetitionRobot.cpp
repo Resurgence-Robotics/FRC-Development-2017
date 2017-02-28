@@ -1,6 +1,7 @@
 #include "WPILib.h"
 #include "CANTalon.h"
 #include "math.h"
+//#include <Timer.h>
 
 
 #define leftY 1
@@ -96,7 +97,7 @@ public:
 		float MotorOutput=0;
 		float kp=0.05;
 		int Tolerance=5;
-		float nProcessValue=(NFeedback/CPR)/LoopTime*60;     //Instantaneous-ish RPM, arithmetic test to the right-> (30000counts/1000cpr)/(Xsec*(60sec/1min)) = (30rot)*(60sec)= 1800 rpm YAY!!
+		float nProcessValue=(NFeedback/CPR)*(LoopTime*60);     //Instantaneous-ish RPM, arithmetic test to the right-> (30000counts/1000cpr)/(1sec*(60sec/1min)) = (30rot)*(60sec)= 1800 rpm YAY!!
 		float nError=RPM-nProcessValue;
 
 			if(nError>1)
@@ -114,6 +115,7 @@ public:
 		return MotorOutput;
 	}
 //functions for drivetrain
+	//motor.Set(Ponly_RPM(800,encoder1,1000,0.005));
 	void SetSpeed(float Rspeed, float Lspeed)					// tested --working on final
 	{
 		Right1.Set(-Rspeed);
@@ -546,6 +548,34 @@ public:
 		   }
 		   timeElapsed= timeElapsed + 0.001;
 		  Wait(0.001);
+		}
+	}
+	void Test()
+	{
+
+
+		while (IsTest() && IsEnabled() )
+		{
+
+		Left1.Set(Ponly_RPM(500,3000,4094,100000)); //CPR varies dependent on the encoder, google it, then multiply it times 4(rise and fall of each)
+	//timer is in milliseconds
+
+		Timer TimeT;
+//		TimeT.Start();
+//		TimeT.Stop();
+//		TimeT.Get();
+//		TimeT.Reset();
+
+		if (Left1.Get() > 0)
+		{
+			TimeT.Start();
+		}
+		else
+			TimeT.Stop();
+			TimeT.Reset();
+
+
+
 		}
 	}
 };
