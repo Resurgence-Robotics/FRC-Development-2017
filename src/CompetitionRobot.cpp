@@ -163,7 +163,7 @@ public:
 			int enc =0;
 				if(target>0)//forward incrementing positive
 				{
-					while(target>enc&&IsAutonomous())
+					while((target>enc)&&(IsAutonomous()&&IsEnabled()))
 					{
 
 					enc=Renc->Get();
@@ -174,11 +174,11 @@ public:
 				}
 				if (target<0)//reverse incrementing negative			//UNTESTED
 				{
-					while(target<enc&&IsAutonomous())
+					while((target<enc)&&(IsAutonomous()&&IsEnabled()))
 					{
 					enc=Renc->Get();
 					printf("\n enc:%i",enc);
-					DriveFRC(-speed, kp*-gyro.GetAngle());
+					DriveFRC(-speed, kp*gyro.GetAngle());
 					Wait(0.01);
 					}
 				}
@@ -196,7 +196,7 @@ public:
 			Renc->Reset();
 			printf("\n Renc: %i", Renc->Get());
 			printf("\n Target:%f",Target);
-			drivestraightwithencoders(Target, 0.25);
+			drivestraightwithencoders(Target, 0.35);
 
 		}
 	void Turn (float angle)				//needs to be tested must be within 1 degree consistently
@@ -260,7 +260,7 @@ public:
 		Wait(0.1);
 
 
-		while (gyro.GetAngle()<angle) //turn right 45 degrees  Tested 2/18- works; to go 90 degrees set it to 84
+		while ((gyro.GetAngle()<angle)&&(IsAutonomous()&&IsEnabled())) //turn right 45 degrees  Tested 2/18- works; to go 90 degrees set it to 84
 		{
 			SetSpeed(-speed,speed);
 		}
@@ -275,7 +275,7 @@ public:
 		gyro.Reset();
 		Wait(0.1);
 
-		while (gyro.GetAngle()> (-1*angle)) //turn left 45 degrees
+		while ((gyro.GetAngle()> (-1*angle))&&(IsAutonomous()&&IsEnabled())) //turn left 45 degrees
 		{
 			SetSpeed(speed,-speed);
 		}
@@ -329,7 +329,7 @@ public:
 	{
 		initializeRobot();
 		Drive(85);
-		Wait(1.50);
+		Wait(0.5);
 		Arm_Mid(); //drop off gear
 		//below this not tested
 		Drive(-50);
@@ -422,7 +422,7 @@ public:
 				float Scale =0.25; //going at 25%power
 				float RightOutput= (JvalY - (Scale * (JvalX)));
 				float LeftOutput = (JvalY + (Scale * (JvalX)));
-				float RotateOutput= (JvalZ * 0.375); //Zaxis //going at 37% power
+				float RotateOutput= (JvalZ * 0.45); //Zaxis //going at 45% power
 				printf("\n X:%f", JvalX);
 				printf("\n Y:%f", JvalY);
 				printf("\n Z:%f", JvalZ);
@@ -574,7 +574,7 @@ public:
 			TimeT.Stop();
 			TimeT.Reset();
 
-
+//if time, make a new one which gets the value of the RPM, returns the number
 
 		}
 	}
