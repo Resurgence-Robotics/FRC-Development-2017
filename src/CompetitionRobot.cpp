@@ -7,12 +7,6 @@
 #define leftY 1
 #define rightY 3
 #define STOP 0.0
-long Map(float x, float in_min, float in_max, float out_min, float out_max){
-	// use this function to match two value's scales proportionally
-	return ((x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min);
-}
-int Funnel_Cycle=2;//initializing variable for funnel position
-bool pressed=false;
 
 class Robot: public SampleRobot
 {
@@ -114,8 +108,11 @@ public:
 			}
 		return MotorOutput;
 	}
-//functions for drivetrain
-	//motor.Set(Ponly_RPM(800,encoder1,1000,0.005));
+	int GetRpm(int NFeedback, int CPR, float LoopTime)
+	{
+		return ((NFeedback/CPR)*(LoopTime*60));
+	}
+	//functions for drivetrain
 	void SetSpeed(float Rspeed, float Lspeed)					// tested --working on final
 	{
 		Right1.Set(-Rspeed);
@@ -267,7 +264,6 @@ public:
 		SetSpeed(STOP);
 
 	}
-	// functions for arm
 	void GyroTurnLeft(int angle)
 	{
 		float speed= 0.25;
@@ -282,6 +278,7 @@ public:
 		SetSpeed(STOP);
 
 	}
+	// functions for arm
 	void Arm_Up()
 	{
 		Arm_floor.Set(DoubleSolenoid::kForward);		//arm is up
@@ -304,7 +301,7 @@ public:
 		Wait(0.05);
 	}
 //autonomous procedures below
-	void initializeRobot()  //initialization, use this before autonomus and Operator controll
+	void initializeRobot()  //initialization, use this before autonomous and Operator control
 	{
 
 		Arm_Up();
@@ -353,8 +350,7 @@ public:
 		Drive(300);
 
 	}
-
-
+//DRVERSTATION METHODS-- code entry-points below
 	void Autonomous()
 	{ //for the autonomus switch- needs to be tested witht the printf
 		int Auto_Sel=Map(Mode_Pot.GetVoltage(), 0, 5, 1, 12);  //0 is the input min, 5 is the input max (5Volts), 1 is the output max, 12 is the output max
@@ -406,10 +402,10 @@ public:
 	}
 	void OperatorControl()
 	{
-
+		bool pressed=false;
+		int Funnel_Cycle=2;//initializing variable for funnel position//could probably set this to zero.
 		float timeElapsed=0;
-		int direction =0;
-		gyro.Reset();
+		float LoopTime=0.001;
 		while(IsOperatorControl() && IsEnabled())
 		{
 
@@ -456,7 +452,7 @@ public:
 					}
 					if(Funnel_Cycle==1)
 					{
-						timeElapsed= timeElapsed - 0.001;
+						timeElapsed= timeElapsed - LoopTime;
 						Funnel.Set(DoubleSolenoid::kForward);
 						LightRed->Set(Relay::Value::kOff);
 						LightGreen->Set(Relay::Value::kForward);  //when the funnel is open, turn the green light on
@@ -465,7 +461,7 @@ public:
 						Wait(0.05);//extend
 					}else if(Funnel_Cycle==0)
 					{
-						float HZ =80.0;  // Hertz= actions per second
+						float HZ =80.0;  // Hertz= cycles per second
 						if(timeElapsed<1/HZ) //every time the gyro resets, change the color of the lights
 						{
 							LightRed->Set(Relay::Value::kOff);
@@ -523,7 +519,6 @@ public:
 		   {
 			   Arm_floor.Set(DoubleSolenoid::kForward);
 			   Arm_peg.Set(DoubleSolenoid::kForward);
-			   Wait(0.05);
 			   Gripper.Set(DoubleSolenoid::kReverse);//close gripper
 			   Wait(0.05);
 		   }
@@ -531,7 +526,6 @@ public:
 		   {
 			   Arm_floor.Set(DoubleSolenoid::kReverse);
 			   Arm_peg.Set(DoubleSolenoid::kForward);
-			   Wait(0.05);
 			   Gripper.Set(DoubleSolenoid::kForward);//open gripper
 			   Wait(0.05);
 		   }
@@ -546,36 +540,25 @@ public:
 			   Arm_floor.Set(DoubleSolenoid::kOff);
 			   Arm_peg.Set(DoubleSolenoid::kOff);
 		   }
-		   timeElapsed= timeElapsed + 0.001;
-		  Wait(0.001);
+		   timeElapsed= timeElapsed + LoopTime;
+		  Wait(LoopTime);
 		}
 	}
 	void Test()
 	{
-
-
+	Timer TimeT;
+	TimeT.Reset();
 		while (IsTest() && IsEnabled() )
 		{
+			TimeT.Start();//actually measures time instead of simply adding the loop times
 
-		Left1.Set(Ponly_RPM(500,3000,4094,100000)); //CPR varies dependent on the encoder, google it, then multiply it times 4(rise and fall of each)
-	//timer is in milliseconds
+			Wait(0.05);//typical waits in a tele-op loop
+			Wait(0.001);
 
-		Timer TimeT;
-//		TimeT.Start();
-//		TimeT.Stop();
-//		TimeT.Get();
-//		TimeT.Reset();
-
-		if (Left1.Get() > 0)
-		{
-			TimeT.Start();
-		}
-		else
-			TimeT.Stop();
+			if(TimeT.HasPeriodPassed(10000))//after 1 second clear the timer
+			{
 			TimeT.Reset();
-
-//if time, make a new one which gets the value of the RPM, returns the number
-
+			}
 		}
 	}
 };
