@@ -162,8 +162,8 @@ public:
 		{ //if need to change because it is not working, use Lenc instead of right, and test it to make sure it counts forward
 			gyro.Reset();
 			Renc->Reset();
-			Wait(1.0);
-			float kp = 0.003;
+			Wait(0.25);
+			float kp = 0.125;
 			int enc =0;
 				if(target>0)//forward incrementing positive
 				{
@@ -171,9 +171,10 @@ public:
 					{
 
 					enc=Renc->Get();
-					printf("\n enc:%i",enc);
-					DriveFRC(speed, kp*-1*gyro.GetAngle());
-					Wait(0.01);
+					printf("\n Renc:%i",enc);
+					printf("\n -------Angle------%f", gyro.GetAngle());
+					DriveFRC(speed, kp*-1*gyro.GetAngle()+0.15);
+					Wait(0.001);
 					}
 				}
 				if (target<0)//reverse incrementing negative			//UNTESTED
@@ -182,8 +183,8 @@ public:
 					{
 					enc=Renc->Get();
 					printf("\n enc:%i",enc);
-					DriveFRC(-speed, kp*gyro.GetAngle());
-					Wait(0.01);
+					DriveFRC(-speed, kp*gyro.GetAngle()+0.15);
+					Wait(0.001);
 					}
 				}
 			DriveFRC(0.0,0.0);
@@ -191,68 +192,34 @@ public:
 	void Drive(float distance)									// tested --working on final( +- 3/8 in)
 //used to drive straight with encoders (measured in inches)
 		{
-			float wheel_radius =2.4;
+			float wheel_radius =2.2;
 			float wheel_circumference = 2*M_PI*wheel_radius;
 			int PPR = 360;
 			float enc_in = PPR/wheel_circumference;
 			float Target = distance*enc_in;
 			Lenc->Reset();
 			Renc->Reset();
-			printf("\n Renc: %i", Renc->Get());
+			printf("\n -------------encoders reset------------");
 			printf("\n Target:%f",Target);
 			drivestraightwithencoders(Target, 0.35);
 
 		}
 	void Turn (float angle)				//needs to be tested must be within 1 degree consistently
-		{
+		{//right only
+//		float speed= 0.25;
+//				// for testing the gyro value
+//		// 90 to the right is +90
+//		//90 to the left is -90
+//			gyro.Reset();
+//			Wait(0.1);
+//			float error=angle-gyro.GetAngle());
+//			while ((gyro.GetAngle()!=angle)&&(IsAutonomous()&&IsEnabled())) //turn right 45 degrees  Tested 2/18- works; to go 90 degrees set it to 84
+//			{
+//
+//			}
+//			SetSpeed(STOP);
 
-			int approachSpeed = 0.25/3;
-			float speed =0.25;
-			int radius = 9.95/2;//wheelbase Radius
-			float wheelRadius = 2.4;
-			float wheel_circumference=2*M_PI*wheelRadius;
-			int PPR = 360;
-			float enc_in = PPR/wheel_circumference;
-			float theta = angle*M_PI/180; //math
-			int arch = M_PI*radius*theta;
-			float target = arch*enc_in;
-			float approach= 8*enc_in;
-			float Tolerance = 1*enc_in;
-			printf("\n arch: %i", arch);
-			printf("\n target: %f", target);
-			printf("\n Encoders Reset");  //\n is new line
-			Lenc->Reset(); //reset the encoder
-			Renc->Reset();
-			printf("\n Renc: %i", Renc->Get());
-			if (angle>0)
-			{
-				printf("\n Turning_Right");  //using approach to turn so that robot does not overshoot the target(where we are trying to go) and keep going back and forth, instead it approaches it slowly.
-				while(-1*Renc->Get()<target)//turn right
-				{
-					float error =target- (-1*Renc->Get());
-					if (error> approach )//go
-					{
-						SetSpeed(-speed, speed);//turning right quickly
-					}
-					else if (error < approach ) //go slower
-					{
-						SetSpeed(-approachSpeed,approachSpeed);//move more slowly as we aproach desired target
-					}
-					printf("\n Renc: %i", -1*Renc->Get());//print current process value
-					Wait(0.05);//give loop time to process
-					if( (std::abs(target-(-1*Renc->Get())))>=Tolerance)
-					{
-						break;//within one inch or past target
-					}
-				}
-				SetSpeed(STOP);//stop the robot when loop is complete
-			}
-			else
-			{
-				//yet to be written
-				printf("\n Turning_Left");
-			}
-			return;
+
 		}
 	void GyroTurnRight(int angle)
 	{
@@ -285,6 +252,7 @@ public:
 		SetSpeed(STOP);
 
 	}
+
 	// functions for arm
 	void Arm_Up()
 	{
@@ -318,7 +286,7 @@ public:
 	void Peg_Left()  //autonomus for putting the gear on the left peg
 	{
 		initializeRobot();
-		Drive(90);
+		Drive(83);
 		Wait(1.50);
 		GyroTurnRight(50);
 		Drive(34);
@@ -326,14 +294,14 @@ public:
 		Arm_Mid();  //dropping off the gear
 		Drive(-34);
 		Arm_Up();
-		GyroTurnLeft(47);
+		GyroTurnLeft(50);
 		drivestraightwithencoders((10*360),1.0);//drive like a bat out of hell for 10 feet.
 	}
 	void Peg_Center()// tested- working
 	{
 		initializeRobot();
-		Drive(85);
-		Wait(0.5);
+		Drive(80);
+		Wait(0.125);
 		Arm_Mid(); //drop off gear
 		//below this not tested
 		Drive(-50);
@@ -345,7 +313,7 @@ public:
 	void Peg_Right()
 	{
 		initializeRobot();
-		Drive(90);//-12,
+		Drive(83);//-7
 		Wait(1.50);
 		GyroTurnLeft(50);
 		Drive(32);
@@ -353,7 +321,7 @@ public:
 		Arm_Mid(); //drop off gear
 		Drive(-32);
 		Arm_Up();
-		GyroTurnRight(47);
+		GyroTurnRight(50);
 		drivestraightwithencoders((10*360),1.0);//drive like a bat out of hell for 10 feet.
 
 	}
@@ -397,9 +365,11 @@ public:
 				LightGreen->Set(Relay::Value::kOff); //turn the green light on
 				LightBlue->Set(Relay::Value::kOff);
 
-				Drive(12);
+				initializeRobot();
+				GyroTurnRight(87);
+
 			}
-			else  //if we did not select any of the 3
+			else  //if we did not select any of the 4
 			{
 				LightRed->Set(Relay::Value::kForward);// turn the red light on
 				LightGreen->Set(Relay::Value::kOff);//turnt the other lights off
