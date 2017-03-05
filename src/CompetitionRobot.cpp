@@ -21,6 +21,7 @@ class Robot: public SampleRobot
 	CANTalon Right1;
 	CANTalon Right2;
 	CANTalon Lift;
+	CANTalon Lift2;
 	DoubleSolenoid Gripper;
 	DoubleSolenoid Funnel;
 	DoubleSolenoid Arm_floor;
@@ -45,6 +46,7 @@ public:
 			Right1(2),
 			Right2(3),
 			Lift(6),//port may change
+			Lift2(7),
 			Gripper(0,4),
 			Funnel(2,6),
 			Arm_floor(1,5),
@@ -55,17 +57,22 @@ public:
 	{
 
 		m_pdp =new PowerDistributionPanel();
+
 		Renc= new Encoder(2,3, true, Encoder::EncodingType::k4X);//both encoders counting forward.
-		Lenc= new Encoder(0,1, true, Encoder::EncodingType::k4X);
+		Lenc= new Encoder(0,1, true, Encoder::EncodingType::k4X);// if counting wrong way, set it to false
+
 		LightRed= new Relay(0);  //for the LED lights
 		LightGreen= new Relay(1);
 		LightBlue= new Relay(2);
-		CameraServer::GetInstance()->StartAutomaticCapture();
+
+		CameraServer::GetInstance()->StartAutomaticCapture("cam0",0);
+		CameraServer::GetInstance()->StartAutomaticCapture("cam1",1);
 
 		gyro.Calibrate();  //calibrate the gyro
 		printf("\n gyro Calibrating...");
 		Wait(0.005);//allow gyro to calibrate
 		printf("\n gyro:%f", gyro.GetAngle());
+
 	}
 // Miscellaneous functions
 	// math functions
@@ -152,7 +159,7 @@ public:
 			SetSpeed(rightOutput, leftOutput);
 		}
 	void drivestraightwithencoders(float target, float speed)	// tested --working on final
-		{
+		{ //if need to change because it is not working, use Lenc instead of right, and test it to make sure it counts forward
 			gyro.Reset();
 			Renc->Reset();
 			Wait(1.0);
@@ -311,16 +318,16 @@ public:
 	void Peg_Left()  //autonomus for putting the gear on the left peg
 	{
 		initializeRobot();
-		Drive(102);
+		Drive(90);
 		Wait(1.50);
-		GyroTurnRight(47);
+		GyroTurnRight(50);
 		Drive(34);
 		Wait(1.50);
 		Arm_Mid();  //dropping off the gear
 		Drive(-34);
 		Arm_Up();
 		GyroTurnLeft(47);
-		Drive(300);
+		drivestraightwithencoders((10*360),1.0);//drive like a bat out of hell for 10 feet.
 	}
 	void Peg_Center()// tested- working
 	{
@@ -338,16 +345,16 @@ public:
 	void Peg_Right()
 	{
 		initializeRobot();
-		Drive(102);
+		Drive(90);//-12,
 		Wait(1.50);
-		GyroTurnLeft(47);
+		GyroTurnLeft(50);
 		Drive(32);
 		Wait(1.50);
 		Arm_Mid(); //drop off gear
 		Drive(-32);
 		Arm_Up();
 		GyroTurnRight(47);
-		Drive(300);
+		drivestraightwithencoders((10*360),1.0);//drive like a bat out of hell for 10 feet.
 
 	}
 //DRVERSTATION METHODS-- code entry-points below
@@ -383,6 +390,15 @@ public:
 
 				Peg_Right();
 			}
+
+			else if (Auto_Sel==4)
+			{
+				LightRed->Set(Relay::Value::kOff);
+				LightGreen->Set(Relay::Value::kOff); //turn the green light on
+				LightBlue->Set(Relay::Value::kOff);
+
+				Drive(12);
+			}
 			else  //if we did not select any of the 3
 			{
 				LightRed->Set(Relay::Value::kForward);// turn the red light on
@@ -391,6 +407,7 @@ public:
 
 			}
 		}
+
 
 		else  //if we are did not select an autonomus run
 		{
@@ -488,14 +505,17 @@ public:
 			if(Gamepad.GetRawButton(6))  //lift intake up- right bumper
 			{
 				Lift.Set(1);
+				Lift2.Set(1);
 			}
 			else if(Gamepad.GetRawButton(5)&&(Gamepad.GetRawButton(9)))   //lift outtake down- left bumper and back button
 			{
 				Lift.Set(-1);
+				Lift2.Set(-1);
 			}
 			else //stop lift
 			{
 				Lift.Set(0.0);
+				Lift2.Set(0.0);
 			}
 
 		//Shared
@@ -547,16 +567,16 @@ public:
 	void Test()
 	{
 	Timer TimeT;
-	TimeT.Reset();
+	TimeT.Start();//actually measures time instead of simply adding the loop times
 		while (IsTest() && IsEnabled() )
 		{
-			TimeT.Start();//actually measures time instead of simply adding the loop times
 
-			Wait(0.05);//typical waits in a tele-op loop
-			Wait(0.001);
+
+			GetRpm(Lenc->Get(),360,TimeT.Get());
 
 			if(TimeT.HasPeriodPassed(10000))//after 1 second clear the timer
 			{
+			Lenc->Reset();
 			TimeT.Reset();
 			}
 		}
