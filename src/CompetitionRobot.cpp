@@ -1,18 +1,23 @@
 #include "WPILib.h"
 #include "CANTalon.h"
 #include "math.h"
-//#include <Timer.h>
-
 
 #define leftY 1
 #define rightY 3
 #define STOP 0.0
-
+#define CIM_RPM 5000
 class Robot: public SampleRobot
 {
 	//intialize class members here
 	PowerDistributionPanel *m_pdp;
 	ADXRS450_Gyro gyro;
+	Encoder *Renc;
+	Encoder *Lenc;
+	Encoder *Tenc;
+	Relay *LightRed;
+	Relay *LightBlue;
+	Relay *LightGreen;
+
 	Joystick stick1; // only joystick
 	Joystick stick2;
 	Joystick Gamepad;
@@ -26,11 +31,7 @@ class Robot: public SampleRobot
 	DoubleSolenoid Funnel;
 	DoubleSolenoid Arm_floor;
 	DoubleSolenoid Arm_peg;
-	Encoder *Renc;
-	Encoder *Lenc;
-	Relay *LightRed;
-	Relay *LightBlue;
-	Relay *LightGreen;
+
 	AnalogInput Mode_Pot;  //used for autonomus
 	DigitalInput Auto_Sw;  //switch used for autonomus
 
@@ -60,13 +61,13 @@ public:
 
 		Renc= new Encoder(2,3, true, Encoder::EncodingType::k4X);//both encoders counting forward.
 		Lenc= new Encoder(0,1, true, Encoder::EncodingType::k4X);// if counting wrong way, set it to false
-
+		Tenc= new Encoder(4,5, true, Encoder::EncodingType::k1X);// if counting wrong way, set it to false
 		LightRed= new Relay(0);  //for the LED lights
 		LightGreen= new Relay(1);
 		LightBlue= new Relay(2);
 
-		CameraServer::GetInstance()->StartAutomaticCapture("cam0",0);
-		CameraServer::GetInstance()->StartAutomaticCapture("cam1",1);
+		//CameraServer::GetInstance()->StartAutomaticCapture("cam0",0);
+		//CameraServer::GetInstance()->StartAutomaticCapture("cam1",1);
 
 		gyro.Calibrate();  //calibrate the gyro
 		printf("\n gyro Calibrating...");
@@ -92,34 +93,39 @@ public:
 		   }
 		   return num;
 	}
-	float Ponly_RPM(int RPM, int NFeedback, float CPR, float LoopTime)//should always be positive, accumulating inputs, run in a timed loop
+	float SetRPM( int RPM_SetPoint, int RPM_Current, int MaxRPM)//should always be positive, accumulating inputs, run in a timed loop
 	{
 		//initialize variables
 		float MotorOutput=0;
-		float kp=0.05;
-		int Tolerance=5;
-		float nProcessValue=(NFeedback/CPR)*(LoopTime*60);     //Instantaneous-ish RPM, arithmetic test to the right-> (30000counts/1000cpr)/(1sec*(60sec/1min)) = (30rot)*(60sec)= 1800 rpm YAY!!
-		float nError=RPM-nProcessValue;
+		float kp=0.008;
+		float BaseSpeed=RPM_SetPoint/MaxRPM-0.05;//just slower theoretically than the desired output ish...
+		float nError=RPM_SetPoint-RPM_Current;
+			if(nError<0)//HOLD BASE SPEED
+			{
+				nError=0;
+			}
+			MotorOutput=kp*nError;
 
-			if(nError>1)
+			if((MotorOutput<BaseSpeed))
 			{
-				MotorOutput=1;//handles exception for motor capacity
+				MotorOutput=BaseSpeed;//prevents us from oscillating around 0
 			}
-			else if(nError<0)
+			else if(MotorOutput>1)
 			{
-				nError=0;//prevents us from oscillating around 0
-			}
-			else
-			{
-				MotorOutput=kp*nError;
+				MotorOutput=BaseSpeed+(0.25*BaseSpeed);//handles exception for motor capacity
 			}
 		return MotorOutput;
 	}
 	int GetRpm(int NFeedback, int CPR, float LoopTime)
 	{
-		return ((NFeedback/CPR)*(LoopTime*60));
+		return ( (abs(NFeedback)/CPR)*(LoopTime*60) );
 	}
-	//functions for drivetrain
+	float Float_abs(float in)
+	{
+
+		return ( in*( (in<0)*(-1)+(in>0) ) );// -40*((1)*-1)+0=40; 40*(((0)*-1)+1)=40   ABS WORKS!!!!
+	}
+//functions for drivetrain
 	void SetSpeed(float Rspeed, float Lspeed)					// tested --working on final
 	{
 		Right1.Set(-Rspeed);
@@ -252,8 +258,7 @@ public:
 		SetSpeed(STOP);
 
 	}
-
-	// functions for arm
+// functions for arm
 	void Arm_Up()
 	{
 		Arm_floor.Set(DoubleSolenoid::kForward);		//arm is up
@@ -536,19 +541,30 @@ public:
 	}
 	void Test()
 	{
+
 	Timer TimeT;
-	TimeT.Start();//actually measures time instead of simply adding the loop times
+	TimeT.Start();//actually measures time instead of simply adding the loop time
+	int motorRPM =0;
+	float Setpoint=3000;
 		while (IsTest() && IsEnabled() )
 		{
 
-
-			GetRpm(Lenc->Get(),360,TimeT.Get());
-
-			if(TimeT.HasPeriodPassed(10000))//after 1 second clear the timer
+			printf("\n Tenc:%i", Tenc->Get());
+/*
+			if(TimeT.Get()>0.125)//after 1/8 second clear the timer
 			{
-			Lenc->Reset();
+			motorRPM= GetRpm(Tenc->Get(), 20, TimeT.Get());
+			Tenc->Reset();
 			TimeT.Reset();
 			}
+			//SetSpeed(1.0);//5000 rpm
+			printf("\n  RPM:%i, Output:%f", motorRPM, (SetRPM(Setpoint, motorRPM, 5000)));
+			SetSpeed((SetRPM(Setpoint, motorRPM, 5000)));
+
+*/
+
+
+
 		}
 	}
 };
