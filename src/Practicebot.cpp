@@ -31,6 +31,7 @@ class Robot: public SampleRobot
 	DoubleSolenoid Funnel;
 	DoubleSolenoid Arm_floor;
 	DoubleSolenoid Arm_peg;
+	DoubleSolenoid Test2;
 
 	AnalogInput Mode_Pot;  //used for autonomus
 	DigitalInput Auto_Sw;  //switch used for autonomus
@@ -47,11 +48,12 @@ public:
 			Right1(3),
 			Right2(4),
 			Lift(0),//port may change
-			Lift2(1),
-			Gripper(6,1),
-			Funnel(0,7),
-			Arm_floor(5,2),
-			Arm_peg(4,3),
+			Lift2(5),
+			Gripper(1,6,1),
+			Funnel(1,0,7),
+			Arm_floor(1,5,2),
+			Arm_peg(1,4,3),
+			Test2(0,7,8),
 			Mode_Pot(0),
 			Auto_Sw(9)
 
