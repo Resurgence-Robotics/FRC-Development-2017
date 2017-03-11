@@ -4,6 +4,7 @@
 
 #define leftY 1
 #define rightY 3
+
 #define STOP 0.0
 #define CIM_RPM 5000
 class Robot: public SampleRobot
@@ -31,8 +32,10 @@ class Robot: public SampleRobot
 	DoubleSolenoid Funnel;
 	DoubleSolenoid Arm_floor;
 	DoubleSolenoid Arm_peg;
-	AnalogInput Mode_Pot;  //used for autonomous
-	DigitalInput Auto_Sw;  //switch used for autonomous
+	DoubleSolenoid Test2;
+
+	AnalogInput Mode_Pot;  //used for autonomus
+	DigitalInput Auto_Sw;  //switch used for autonomus
 
 
 public:
@@ -45,26 +48,27 @@ public:
 			Left2(1),
 			Right1(2),
 			Right2(3),
-			Lift(6),//port may change
-			Lift2(7),
-			Gripper(0,4),
-			Funnel(2,6),
-			Arm_floor(1,5),
-			Arm_peg(3,7),
+			Lift(0),//port may change
+			Lift2(5),
+			Gripper(1,1,6),
+			Funnel(1,0,7),
+			Arm_floor(1,3,4),
+			Arm_peg(1,2,5),
+			Test2(0,0,1),
 			Mode_Pot(0),
 			Auto_Sw(9)
 
 	{
 
 		m_pdp =new PowerDistributionPanel();
-
+		Compressor *mCompressor =new Compressor(0);
 		Renc= new Encoder(2,3, true, Encoder::EncodingType::k4X);//both encoders counting forward.
 		Lenc= new Encoder(0,1, true, Encoder::EncodingType::k4X);// if counting wrong way, set it to false
 		Tenc= new Encoder(4,5, true, Encoder::EncodingType::k1X);// if counting wrong way, set it to false
 		LightRed= new Relay(0);  //for the LED lights
 		LightGreen= new Relay(1);
 		LightBlue= new Relay(2);
-
+		Test2.Set(DoubleSolenoid::kForward);
 		//CameraServer::GetInstance()->StartAutomaticCapture("cam0",0);
 		//CameraServer::GetInstance()->StartAutomaticCapture("cam1",1);
 
@@ -92,42 +96,27 @@ public:
 		   }
 		   return num;
 	}
-	float SetRPM( float RPM_SetPoint, float RPM_Current, float MaxRPM)//should always be positive, accumulating inputs, run in a timed loop
+	float SetRPM( int RPM_SetPoint, int RPM_Current, int MaxRPM)//should always be positive, accumulating inputs, run in a timed loop
 	{
 		//initialize variables
-		RPM_SetPoint=+450;
 		float MotorOutput=0;
 		float kp=0.008;
-		float BaseSpeed=((RPM_SetPoint)/MaxRPM);//just slower theoretically than the desired output ish...
-		float scale=0.5 * BaseSpeed;
-		float nError=(RPM_SetPoint-RPM_Current)/10;
-		float Output;
-
-		if(nError>=1)
-		{
-			Output= ((kp*nError)*(BaseSpeed+scale));
-			if(Output<BaseSpeed)
+		float BaseSpeed=RPM_SetPoint/MaxRPM-0.05;//just slower theoretically than the desired output ish...
+		float nError=RPM_SetPoint-RPM_Current;
+			if(nError<0)//HOLD BASE SPEED
 			{
-				Output=BaseSpeed;
+				nError=0;
 			}
+			MotorOutput=kp*nError;
 
-
-		}
-		else if (nError<1)
-		{
-			nError=5;
-		}
-
-		if(Output>1)
-		{
-			Output=1;
-		}
-//		else if(Output<0)
-//		{
-//			Output=0;
-//		}
-
-		MotorOutput=Output;
+			if((MotorOutput<BaseSpeed))
+			{
+				MotorOutput=BaseSpeed;//prevents us from oscillating around 0
+			}
+			else if(MotorOutput>1)
+			{
+				MotorOutput=BaseSpeed+(0.25*BaseSpeed);//handles exception for motor capacity
+			}
 		return MotorOutput;
 	}
 	int GetRpm(int NFeedback, int CPR, float LoopTime)
@@ -302,7 +291,7 @@ public:
 		Gripper.Set(DoubleSolenoid::kReverse); //close gripper
 		Funnel.Set(DoubleSolenoid::kReverse); // close funnel
 	}
-	void Peg_Left()  //autonomous for putting the gear on the left peg
+	void Peg_Left()  //autonomus for putting the gear on the left peg
 	{
 		initializeRobot();
 		Drive(83);
@@ -563,24 +552,22 @@ public:
 		while (IsTest() && IsEnabled() )
 		{
 
-		//	printf("\n Tenc:%i",);
-
-
-			if(TimeT.Get()>.125)//after 1/8 second clear the timer
+			printf("\n Tenc:%i", Tenc->Get());
+/*
+			if(TimeT.Get()>0.125)//after 1/8 second clear the timer
 			{
-			motorRPM= GetRpm(Tenc->Get(), 41, TimeT.Get());
+			motorRPM= GetRpm(Tenc->Get(), 20, TimeT.Get());
 			Tenc->Reset();
 			TimeT.Reset();
-			SetSpeed((SetRPM(Setpoint, motorRPM, CIM_RPM)));
 			}
 			//SetSpeed(1.0);//5000 rpm
-			printf("\n  RPM:%i, Output:%f, Encoder:%i", motorRPM, (SetRPM(Setpoint, motorRPM, CIM_RPM)),  Tenc->Get());
+			printf("\n  RPM:%i, Output:%f", motorRPM, (SetRPM(Setpoint, motorRPM, 5000)));
+			SetSpeed((SetRPM(Setpoint, motorRPM, 5000)));
+
+*/
 
 
 
-
-
-			Wait(0.005);
 		}
 	}
 };
