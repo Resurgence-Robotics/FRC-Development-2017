@@ -44,10 +44,10 @@ public:
 			stick1(0),
 			stick2(1),
 			Gamepad(2),
-			Left1(0),  //ports in the roboRIO
-			Left2(1),
-			Right1(2),
-			Right2(3),
+			Left1(4),  //ports in the roboRIO
+			Left2(3),
+			Right1(1),
+			Right2(2),
 			Lift(0),//port may change
 			Lift2(5),
 			Gripper(1,1,6),
@@ -400,20 +400,20 @@ public:
 		bool pressed=false;
 		int Funnel_Cycle=2;//initializing variable for funnel position//could probably set this to zero.
 		float timeElapsed=0;
-		float LoopTime=0.001;
+		float LoopTime=0.007;
 		while(IsOperatorControl() && IsEnabled())
 		{
 
 		//Driver1
 			//drivetrain
 				float threshold= 0.08;
-				float JvalY=-1*stick1.GetY();//+up
+				float JvalY=stick1.GetY();//+up
 				float JvalX=stick1.GetX();//+right
-				float JvalZ=stick1.GetRawAxis(3); //turing when not moving
+				float JvalZ=stick1.GetRawAxis(2); //turing when not moving
 				float Scale =0.25; //going at 25%power
 				float RightOutput= (JvalY - (Scale * (JvalX)));
 				float LeftOutput = (JvalY + (Scale * (JvalX)));
-				float RotateOutput= (JvalZ * 0.45); //Zaxis //going at 45% power
+				float RotateOutput= ((JvalZ * 0.45)+(JvalX*Scale)); //Zaxis //going at 45% power
 				printf("\n X:%f", JvalX);
 				printf("\n Y:%f", JvalY);
 				printf("\n Z:%f", JvalZ);
