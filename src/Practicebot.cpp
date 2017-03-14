@@ -407,17 +407,17 @@ public:
 		//Driver1
 			//drivetrain
 				float threshold= 0.08;
-			float JvalY=-1*stick1.GetY();//+up
+				float JvalY=-1*stick1.GetY();//+up
 				float JvalX=stick1.GetX();//+right
-		//		float JvalZ=stick1.GetRawAxis(3); //turing when not moving
+				float JvalZ=stick1.GetRawAxis(3); //turing when not moving
 				float Scale =0.25; //going at 25%power
 				float Sensitivity =Map(stick1.GetRawAxis(2),-1.0 , 1.0, 0.125, 0.5);
 				float RightOutput= (JvalY - (Scale * (JvalX)));
 				float LeftOutput = (JvalY + (Scale * (JvalX)));
-		//		float RotateOutput= ((JvalZ * 0.45)+(JvalX*Scale)); //Zaxis //going at 45% power
+				float RotateOutput= (/*(JvalZ * 0.45)+*/(JvalX*Scale)); //Zaxis //going at 45% power
 				printf("\n X:%f", JvalX);
 				printf("\n Y:%f", JvalY);
-		//		printf("\n Z:%f", JvalZ);
+				printf("\n Z:%f", JvalZ);
 				printf("\n RightValue:%f", RightOutput);
 				printf("\n LeftValue: %f", LeftOutput);
 
