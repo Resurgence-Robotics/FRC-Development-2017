@@ -5,6 +5,17 @@
 #define leftY 1
 #define rightY 3
 
+	void StartExcellLogging()//hopefully will be used in VS for a reason to start data logging when we get there
+	{
+	printf("logging initialized");
+	printf("Lenc, Renc, Gyro, Accel, Setpoint, ProcessData, Output, Auto_Sw, Run_Mode, etc3, Time");
+	}
+	void StopExcellLoging()//will be used in VS for a reason to stop data logging
+	{
+	printf("logging deinitialized");
+	}
+
+
 #define STOP 0.0
 #define CIM_RPM 5000
 class Robot: public SampleRobot
@@ -76,10 +87,10 @@ public:
 		printf("\n gyro Calibrating...");
 		Wait(0.005);//allow gyro to calibrate
 		printf("\n gyro:%f", gyro.GetAngle());
-
+		StartExcellLogging();//gives the go ahead to visual studios program to start logging useful information
 	}
-// Miscellaneous functions
-	// math functions
+
+	// Miscellaneous functions- that do not call Outputs
 	float Map(float x, float in_min, float in_max, float out_min, float out_max){
 	        // use this function to match two value's scales proportionally
 	        return ((x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min);
@@ -128,7 +139,11 @@ public:
 
 		return ( in*( (in<0)*(-1)+(in>0) ) );// -40*((1)*-1)+0=40; 40*(((0)*-1)+1)=40   ABS WORKS!!!!
 	}
-//functions for drivetrain
+	void ExcellOut(float Setpoint, float ProcessData, float Output,float etc1,float etc2,float etc3)
+	{
+		printf("%i, %i, %f, %f, %f, %f, %f, %f, %f, %f, %f,", Lenc->Get(), Renc->Get(), gyro.GetAngle(), 0.0, Setpoint, ProcessData, Output, etc1, etc2, etc3, time);
+	}
+	//functions for drivetrain
 	void SetSpeed(float Rspeed, float Lspeed)					// tested --working on final
 	{
 		Right1.Set(-Rspeed);
@@ -171,6 +186,9 @@ public:
 		{ //if need to change because it is not working, use Lenc instead of right, and test it to make sure it counts forward
 			gyro.Reset();
 			Renc->Reset();
+			Lenc->Reset();
+			Renc->Reset();
+			ExcellOut(target,0,0,0,0,0);
 			Wait(0.25);
 			float kp = 0.125;
 			int enc =0;
@@ -178,11 +196,11 @@ public:
 				{
 					while((target>enc)&&(IsAutonomous()&&IsEnabled()))
 					{
-
+					float correction=kp*-1*gyro.GetAngle()+0.15;
 					enc=Renc->Get();
-					printf("\n Renc:%i",enc);
-					printf("\n -------Angle------%f", gyro.GetAngle());
-					DriveFRC(speed, kp*-1*gyro.GetAngle()+0.15);
+					DriveFRC(speed, correction);
+
+					ExcellOut(target,correction,0,0,0,0);
 					Wait(0.001);
 					}
 				}
@@ -190,9 +208,11 @@ public:
 				{
 					while((target<enc)&&(IsAutonomous()&&IsEnabled()))
 					{
+					float correction=kp*gyro.GetAngle()+0.15;
 					enc=Renc->Get();
-					printf("\n enc:%i",enc);
-					DriveFRC(-speed, kp*gyro.GetAngle()+0.15);
+					DriveFRC(-speed, correction);
+
+					ExcellOut(target,correction,0,0,0,0);
 					Wait(0.001);
 					}
 				}
@@ -206,29 +226,7 @@ public:
 			int PPR = 360;
 			float enc_in = PPR/wheel_circumference;
 			float Target = distance*enc_in;
-			Lenc->Reset();
-			Renc->Reset();
-			printf("\n -------------encoders reset------------");
-			printf("\n Target:%f",Target);
 			drivestraightwithencoders(Target, 0.35);
-
-		}
-	void Turn (float angle)				//needs to be tested must be within 1 degree consistently
-		{//right only
-//		float speed= 0.25;
-//				// for testing the gyro value
-//		// 90 to the right is +90
-//		//90 to the left is -90
-//			gyro.Reset();
-//			Wait(0.1);
-//			float error=angle-gyro.GetAngle());
-//			while ((gyro.GetAngle()!=angle)&&(IsAutonomous()&&IsEnabled())) //turn right 45 degrees  Tested 2/18- works; to go 90 degrees set it to 84
-//			{
-//
-//			}
-//			SetSpeed(STOP);
-
-
 		}
 	void GyroTurnRight(int angle)
 	{
@@ -238,10 +236,10 @@ public:
 //90 to the left is -90
 		gyro.Reset();
 		Wait(0.1);
-
-
+		ExcellOut(angle,0,0,0,0,0);
 		while ((gyro.GetAngle()<angle)&&(IsAutonomous()&&IsEnabled())) //turn right 45 degrees  Tested 2/18- works; to go 90 degrees set it to 84
 		{
+			ExcellOut(angle,0,0,0,0,0);
 			SetSpeed(-speed,speed);
 		}
 		SetSpeed(STOP);
@@ -250,12 +248,12 @@ public:
 	void GyroTurnLeft(int angle)
 	{
 		float speed= 0.25;
-
+		ExcellOut(angle,0,0,0,0,0);
 		gyro.Reset();
 		Wait(0.1);
-
 		while ((gyro.GetAngle()> (-1*angle))&&(IsAutonomous()&&IsEnabled())) //turn left 45 degrees
 		{
+			ExcellOut(angle,0,0,0,0,0);
 			SetSpeed(speed,-speed);
 		}
 		SetSpeed(STOP);
@@ -337,8 +335,9 @@ public:
 	void Autonomous()
 	{ //for the autonomus switch- needs to be tested witht the printf
 		int Auto_Sel=Map(Mode_Pot.GetVoltage(), 0, 5, 1, 12);  //0 is the input min, 5 is the input max (5Volts), 1 is the output max, 12 is the output max
-		printf("SW:%i\n", Auto_Sw.Get());
-		printf("Mode:%i \n", Auto_Sel);
+		//printf("SW:%i\n", Auto_Sw.Get());
+		//printf("Mode:%i \n", Auto_Sel);
+		ExcellOut(0, 0, 0, Auto_Sel, Auto_Sw.Get(), 0);
 
 		if (Auto_Sw.Get()==true) //if we selected number 1,2, or 3 (it is true)
 		{
@@ -397,6 +396,7 @@ public:
 	}
 	void OperatorControl()
 	{
+		StopExcellLoging();
 		bool pressed=false;
 		int Funnel_Cycle=2;//initializing variable for funnel position//could probably set this to zero.
 		float timeElapsed=0;
