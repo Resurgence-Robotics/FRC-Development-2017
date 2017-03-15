@@ -8,7 +8,7 @@
 	void StartExcellLogging()//hopefully will be used in VS for a reason to start data logging when we get there
 	{
 	printf("logging initialized");
-	printf("Lenc, Renc, Gyro, Accel, Setpoint, ProcessData, Output, Auto_Sw, Run_Mode, etc3, Time");
+	printf("Lenc, Renc, Gyro, Accel, Setpoint, ProcessData, Output, Auto_Sw, Run_Mode, Method, Time");
 	}
 	void StopExcellLoging()//will be used in VS for a reason to stop data logging
 	{
@@ -87,8 +87,7 @@ public:
 		printf("\n gyro Calibrating...");
 		Wait(0.005);//allow gyro to calibrate
 		printf("\n gyro:%f", gyro.GetAngle());
-		StartExcellLogging();//gives the go ahead to visual studios program to start logging useful information
-	}
+		}
 
 	// Miscellaneous functions- that do not call Outputs
 	float Map(float x, float in_min, float in_max, float out_min, float out_max){
@@ -139,9 +138,9 @@ public:
 
 		return ( in*( (in<0)*(-1)+(in>0) ) );// -40*((1)*-1)+0=40; 40*(((0)*-1)+1)=40   ABS WORKS!!!!
 	}
-	void ExcellOut(float Setpoint, float ProcessData, float Output,float etc1,float etc2,float etc3)
+	void ExcellOut(float Setpoint, float ProcessData, float Output,float etc1,float etc2, int MethodInUse)
 	{
-		printf("%i, %i, %f, %f, %f, %f, %f, %f, %f, %f, %f,", Lenc->Get(), Renc->Get(), gyro.GetAngle(), 0.0, Setpoint, ProcessData, Output, etc1, etc2, etc3, time);
+		printf("%i, %i, %f, %f, %f, %f, %f, %f, %f, %f, %f,", Lenc->Get(), Renc->Get(), gyro.GetAngle(), 0.0, Setpoint, ProcessData, Output, etc1, etc2, MethodInUse, time);
 	}
 	//functions for drivetrain
 	void SetSpeed(float Rspeed, float Lspeed)					// tested --working on final
@@ -188,7 +187,7 @@ public:
 			Renc->Reset();
 			Lenc->Reset();
 			Renc->Reset();
-			ExcellOut(target,0,0,0,0,0);
+			ExcellOut(target,0,0,0,0,1);
 			Wait(0.25);
 			float kp = 0.125;
 			int enc =0;
@@ -200,7 +199,7 @@ public:
 					enc=Renc->Get();
 					DriveFRC(speed, correction);
 
-					ExcellOut(target,correction,0,0,0,0);
+					ExcellOut(target,correction,0,0,0,1);
 					Wait(0.001);
 					}
 				}
@@ -212,7 +211,7 @@ public:
 					enc=Renc->Get();
 					DriveFRC(-speed, correction);
 
-					ExcellOut(target,correction,0,0,0,0);
+					ExcellOut(target,correction,0,0,0,1);
 					Wait(0.001);
 					}
 				}
@@ -236,7 +235,7 @@ public:
 //90 to the left is -90
 		gyro.Reset();
 		Wait(0.1);
-		ExcellOut(angle,0,0,0,0,0);
+		ExcellOut(angle,0,0,0,0,2);
 		while ((gyro.GetAngle()<angle)&&(IsAutonomous()&&IsEnabled())) //turn right 45 degrees  Tested 2/18- works; to go 90 degrees set it to 84
 		{
 			ExcellOut(angle,0,0,0,0,0);
@@ -248,7 +247,7 @@ public:
 	void GyroTurnLeft(int angle)
 	{
 		float speed= 0.25;
-		ExcellOut(angle,0,0,0,0,0);
+		ExcellOut(angle,0,0,0,0,3);
 		gyro.Reset();
 		Wait(0.1);
 		while ((gyro.GetAngle()> (-1*angle))&&(IsAutonomous()&&IsEnabled())) //turn left 45 degrees
@@ -333,7 +332,9 @@ public:
 	}
 //DRVERSTATION METHODS-- code entry-points below
 	void Autonomous()
-	{ //for the autonomus switch- needs to be tested witht the printf
+	{
+		StartExcellLogging();//gives the go ahead to visual studios
+		//for the autonomus switch- needs to be tested witht the printf
 		int Auto_Sel=Map(Mode_Pot.GetVoltage(), 0, 5, 1, 12);  //0 is the input min, 5 is the input max (5Volts), 1 is the output max, 12 is the output max
 		//printf("SW:%i\n", Auto_Sw.Get());
 		//printf("Mode:%i \n", Auto_Sel);
