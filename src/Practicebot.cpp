@@ -415,7 +415,7 @@ public:
 				float Sensitivity =Map(stick1.GetRawAxis(2),-1.0 , 1.0, 0.125, 0.5);
 				float RightOutput= (JvalY - (Scale * (JvalX)));
 				float LeftOutput = (JvalY + (Scale * (JvalX)));
-				float RotateOutput= (/*(JvalZ * 0.45)+*/(JvalX*Scale)); //Zaxis //going at 45% power
+				float RotateOutput= (/*(JvalZ * 0.45)+*/(JvalX*0.4)); //change this number to change turning speed- 0.4
 				printf("\n X:%f", JvalX);
 				printf("\n Y:%f", JvalY);
 				printf("\n Z:%f", JvalZ);
