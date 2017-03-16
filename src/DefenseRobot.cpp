@@ -5,16 +5,6 @@
 #define leftY 1
 #define rightY 3
 
-	void StartExcellLogging()//hopefully will be used in VS for a reason to start data logging when we get there
-	{
-	printf("\n <$EO$> Lenc, Renc, Gyro, Accel, Setpoint, ProcessData, Output, Auto_Sw, Run_Mode, Method, Time");
-	}
-	void StopExcellLoging()//will be used in VS for a reason to stop data logging
-	{
-	printf("\n <$EO$> STOPLOG");
-	}
-
-
 #define STOP 0.0
 #define CIM_RPM 5000
 class Robot: public SampleRobot
@@ -30,7 +20,7 @@ class Robot: public SampleRobot
 	Relay *LightGreen;
 
 	Joystick stick1; // only joystick
-	//Joystick stick2;
+	Joystick stick2;
 	Joystick Gamepad;
 	CANTalon Left1;
 	CANTalon Left2;
@@ -52,12 +42,12 @@ public:
 	Robot() :
 		//initialize these in the same order they are instantiated (listed) above
 			stick1(0),
-			//stick2(1),
+			stick2(1),
 			Gamepad(2),
-			Left1(1),  //ports in the roboRIO
-			Left2(2),
-			Right1(3),
-			Right2(4),
+			Left1(4),  //ports in the roboRIO
+			Left2(3),
+			Right1(1),
+			Right2(2),
 			Lift(0),//port may change
 			Lift2(5),
 			Gripper(1,1,6),
@@ -86,9 +76,10 @@ public:
 		printf("\n gyro Calibrating...");
 		Wait(0.005);//allow gyro to calibrate
 		printf("\n gyro:%f", gyro.GetAngle());
-		}
 
-	// Miscellaneous functions- that do not call Outputs
+	}
+// Miscellaneous functions
+	// math functions
 	float Map(float x, float in_min, float in_max, float out_min, float out_max){
 	        // use this function to match two value's scales proportionally
 	        return ((x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min);
@@ -137,11 +128,7 @@ public:
 
 		return ( in*( (in<0)*(-1)+(in>0) ) );// -40*((1)*-1)+0=40; 40*(((0)*-1)+1)=40   ABS WORKS!!!!
 	}
-	void ExcellOut(float Setpoint, float ProcessData, float Output,float etc1,float etc2, int MethodInUse)// <$EO$> is a special tag so we can tell when to output a chunk of data
-	{
-		printf("\n <$EO$> %i, %i, %f, %f, %f, %f, %f, %f, %f, %f, %f ", Lenc->Get(), Renc->Get(), gyro.GetAngle(), 0.0, Setpoint, ProcessData, Output, etc1, etc2, MethodInUse, (clock/CLOCKS_PER_SEC));
-	}
-	//functions for drivetrain
+//functions for drivetrain
 	void SetSpeed(float Rspeed, float Lspeed)					// tested --working on final
 	{
 		Right1.Set(-Rspeed);
@@ -184,9 +171,6 @@ public:
 		{ //if need to change because it is not working, use Lenc instead of right, and test it to make sure it counts forward
 			gyro.Reset();
 			Renc->Reset();
-			Lenc->Reset();
-			Renc->Reset();
-			ExcellOut(target,0,0,0,0,1);
 			Wait(0.25);
 			float kp = 0.125;
 			int enc =0;
@@ -194,11 +178,11 @@ public:
 				{
 					while((target>enc)&&(IsAutonomous()&&IsEnabled()))
 					{
-					float correction=kp*-1*gyro.GetAngle()+0.15;
-					enc=Renc->Get();
-					DriveFRC(speed, correction);
 
-					ExcellOut(target,correction,0,0,0,1);
+					enc=Renc->Get();
+					printf("\n Renc:%i",enc);
+					printf("\n -------Angle------%f", gyro.GetAngle());
+					DriveFRC(speed, kp*-1*gyro.GetAngle()+0.15);
 					Wait(0.001);
 					}
 				}
@@ -206,11 +190,9 @@ public:
 				{
 					while((target<enc)&&(IsAutonomous()&&IsEnabled()))
 					{
-					float correction=kp*gyro.GetAngle()+0.15;
 					enc=Renc->Get();
-					DriveFRC(-speed, correction);
-
-					ExcellOut(target,correction,0,0,0,1);
+					printf("\n enc:%i",enc);
+					DriveFRC(-speed, kp*gyro.GetAngle()+0.15);
 					Wait(0.001);
 					}
 				}
@@ -224,7 +206,29 @@ public:
 			int PPR = 360;
 			float enc_in = PPR/wheel_circumference;
 			float Target = distance*enc_in;
+			Lenc->Reset();
+			Renc->Reset();
+			printf("\n -------------encoders reset------------");
+			printf("\n Target:%f",Target);
 			drivestraightwithencoders(Target, 0.35);
+
+		}
+	void Turn (float angle)				//needs to be tested must be within 1 degree consistently
+		{//right only
+//		float speed= 0.25;
+//				// for testing the gyro value
+//		// 90 to the right is +90
+//		//90 to the left is -90
+//			gyro.Reset();
+//			Wait(0.1);
+//			float error=angle-gyro.GetAngle());
+//			while ((gyro.GetAngle()!=angle)&&(IsAutonomous()&&IsEnabled())) //turn right 45 degrees  Tested 2/18- works; to go 90 degrees set it to 84
+//			{
+//
+//			}
+//			SetSpeed(STOP);
+
+
 		}
 	void GyroTurnRight(int angle)
 	{
@@ -234,10 +238,10 @@ public:
 //90 to the left is -90
 		gyro.Reset();
 		Wait(0.1);
-		ExcellOut(angle,0,0,0,0,2);
+
+
 		while ((gyro.GetAngle()<angle)&&(IsAutonomous()&&IsEnabled())) //turn right 45 degrees  Tested 2/18- works; to go 90 degrees set it to 84
 		{
-			ExcellOut(angle,0,0,0,0,0);
 			SetSpeed(-speed,speed);
 		}
 		SetSpeed(STOP);
@@ -246,17 +250,32 @@ public:
 	void GyroTurnLeft(int angle)
 	{
 		float speed= 0.25;
-		ExcellOut(angle,0,0,0,0,3);
+
 		gyro.Reset();
 		Wait(0.1);
+
 		while ((gyro.GetAngle()> (-1*angle))&&(IsAutonomous()&&IsEnabled())) //turn left 45 degrees
 		{
-			ExcellOut(angle,0,0,0,0,0);
 			SetSpeed(speed,-speed);
 		}
 		SetSpeed(STOP);
 
 	}
+	void DriveCoast()
+		{
+			Left1.ConfigNeutralMode(CANSpeedController::NeutralMode::kNeutralMode_Coast);
+			Left2.ConfigNeutralMode(CANSpeedController::NeutralMode::kNeutralMode_Coast);
+			Right1.ConfigNeutralMode(CANSpeedController::NeutralMode::kNeutralMode_Coast);
+			Right2.ConfigNeutralMode(CANSpeedController::NeutralMode::kNeutralMode_Coast);
+
+		}
+		void DriveBrake()
+		{
+			Left1.ConfigNeutralMode(CANSpeedController::NeutralMode::kNeutralMode_Brake);
+			Left2.ConfigNeutralMode(CANSpeedController::NeutralMode::kNeutralMode_Brake);
+			Right1.ConfigNeutralMode(CANSpeedController::NeutralMode::kNeutralMode_Brake);
+			Right2.ConfigNeutralMode(CANSpeedController::NeutralMode::kNeutralMode_Brake);
+		}
 // functions for arm
 	void Arm_Up()
 	{
@@ -331,13 +350,10 @@ public:
 	}
 //DRVERSTATION METHODS-- code entry-points below
 	void Autonomous()
-	{
-		StartExcellLogging();//gives the go ahead to visual studios
-		//for the autonomus switch- needs to be tested witht the printf
+	{ //for the autonomus switch- needs to be tested witht the printf
 		int Auto_Sel=Map(Mode_Pot.GetVoltage(), 0, 5, 1, 12);  //0 is the input min, 5 is the input max (5Volts), 1 is the output max, 12 is the output max
-		//printf("SW:%i\n", Auto_Sw.Get());
-		//printf("Mode:%i \n", Auto_Sel);
-		ExcellOut(0, 0, 0, Auto_Sel, Auto_Sw.Get(), 0);
+		printf("SW:%i\n", Auto_Sw.Get());
+		printf("Mode:%i \n", Auto_Sel);
 
 		if (Auto_Sw.Get()==true) //if we selected number 1,2, or 3 (it is true)
 		{
@@ -396,43 +412,33 @@ public:
 	}
 	void OperatorControl()
 	{
-		StopExcellLoging();
 		bool pressed=false;
 		int Funnel_Cycle=2;//initializing variable for funnel position//could probably set this to zero.
 		float timeElapsed=0;
-		float LoopTime=0.001;
+		float LoopTime=0.007;
 		while(IsOperatorControl() && IsEnabled())
 		{
 
 		//Driver1
 			//drivetrain
 				float threshold= 0.08;
-				float JvalY=-1*stick1.GetY();//+up
+				float JvalY=stick1.GetY();//+up
 				float JvalX=stick1.GetX();//+right
-				float JvalZ=stick1.GetRawAxis(3); //turing when not moving
+				float JvalZ=stick1.GetRawAxis(2); //turing when not moving
 				float Scale =0.25; //going at 25%power
-				float Sensitivity =Map(stick1.GetRawAxis(2),-1.0 , 1.0, 0.125, 0.5);
 				float RightOutput= (JvalY - (Scale * (JvalX)));
 				float LeftOutput = (JvalY + (Scale * (JvalX)));
-				float RotateOutput= (/*(JvalZ * 0.45)+*/(JvalX*0.4)); //change this number to change turning speed- 0.4
+				float RotateOutput= ((JvalZ * 0.45)+(JvalX*Scale)); //Zaxis //going at 45% power
 				printf("\n X:%f", JvalX);
 				printf("\n Y:%f", JvalY);
 				printf("\n Z:%f", JvalZ);
 				printf("\n RightValue:%f", RightOutput);
 				printf("\n LeftValue: %f", LeftOutput);
-
 				if(JvalY > threshold || JvalY < (-1*threshold))  //if we are moving
 				{
-					if(stick1.GetRawButton(5))
-					{
-						SetSpeed(RightOutput*Sensitivity, LeftOutput*Sensitivity);
-					}
-					else
-					{
 					SetSpeed(RightOutput,LeftOutput);//keep it stright
-					}
 				}
-				else //if we are not moving forward
+				else //if we are not moving
 				{
 
 					SetSpeed((-1*RotateOutput), RotateOutput);  //twist and shout (turn)
@@ -507,7 +513,7 @@ public:
 
 		//Shared
 			//gripper
-		   if ((Gamepad.GetRawButton(8))||(stick1.GetRawButton(3)))  //gripper open- left trigger
+		   if ((Gamepad.GetRawButton(8))||(stick2.GetRawButton(1)))  //gripper open- left trigger
 		   {
 			   Gripper.Set(DoubleSolenoid::kForward);
 			   Wait(0.05);
@@ -517,7 +523,7 @@ public:
 			   Gripper.Set(DoubleSolenoid::kReverse);
 			   Wait(0.05);
 		   }
-		   else //stop powering solenoid gripper
+		   else //close gripper
 		   {
 			   Gripper.Set(DoubleSolenoid::kOff);
 		   }
@@ -533,7 +539,6 @@ public:
 		   {
 			   Arm_floor.Set(DoubleSolenoid::kReverse);
 			   Arm_peg.Set(DoubleSolenoid::kForward);
-			   Wait(0.08);
 			   Gripper.Set(DoubleSolenoid::kForward);//open gripper
 			   Wait(0.05);
 		   }
