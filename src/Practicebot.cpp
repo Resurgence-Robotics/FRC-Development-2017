@@ -7,12 +7,11 @@
 
 	void StartExcellLogging()//hopefully will be used in VS for a reason to start data logging when we get there
 	{
-	printf("logging initialized");
-	printf("Lenc, Renc, Gyro, Accel, Setpoint, ProcessData, Output, Auto_Sw, Run_Mode, Method, Time");
+	printf("\n <$EO$> Lenc, Renc, Gyro, Accel, Setpoint, ProcessData, Output, Auto_Sw, Run_Mode, Method, Time");
 	}
 	void StopExcellLoging()//will be used in VS for a reason to stop data logging
 	{
-	printf("logging deinitialized");
+	printf("\n <$EO$> STOPLOG");
 	}
 
 
@@ -138,9 +137,9 @@ public:
 
 		return ( in*( (in<0)*(-1)+(in>0) ) );// -40*((1)*-1)+0=40; 40*(((0)*-1)+1)=40   ABS WORKS!!!!
 	}
-	void ExcellOut(float Setpoint, float ProcessData, float Output,float etc1,float etc2, int MethodInUse)
+	void ExcellOut(float Setpoint, float ProcessData, float Output,float etc1,float etc2, int MethodInUse)// <$EO$> is a special tag so we can tell when to output a chunk of data
 	{
-		printf("%i, %i, %f, %f, %f, %f, %f, %f, %f, %f, %f,", Lenc->Get(), Renc->Get(), gyro.GetAngle(), 0.0, Setpoint, ProcessData, Output, etc1, etc2, MethodInUse, time);
+		printf("\n <$EO$> %i, %i, %f, %f, %f, %f, %f, %f, %f, %f, %f ", Lenc->Get(), Renc->Get(), gyro.GetAngle(), 0.0, Setpoint, ProcessData, Output, etc1, etc2, MethodInUse, (clock/CLOCKS_PER_SEC));
 	}
 	//functions for drivetrain
 	void SetSpeed(float Rspeed, float Lspeed)					// tested --working on final
