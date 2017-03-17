@@ -85,6 +85,7 @@ public:
 		printf("\n gyro Calibrating...");
 		Wait(0.005);//allow gyro to calibrate
 		printf("\n gyro:%f", gyro.GetAngle());
+		StartExcellLogging();
 
 	}
 	// Miscellaneous functions- that do not call Outputs
@@ -228,7 +229,7 @@ public:
 			}
 		void GyroTurnRight(int angle)
 		{
-			float speed= 0.25;
+			float speed= 0.35; //changed from 25% to 100%
 			// for testing the gyro value
 	// 90 to the right is +90
 	//90 to the left is -90
@@ -362,7 +363,13 @@ public:
 				LightBlue->Set(Relay::Value::kOff); //put the lights in the same order thoughout the code!
 				printf("Left");
 
-				GyroTurnRight(87);
+				DriveBrake();
+				GyroTurnRight(80);
+				Wait(3.0);
+
+				DriveCoast();
+				GyroTurnRight(80);
+
 			//	Peg_Left(); //use peg left
 			}
 			else if (Auto_Sel==2)//if it is in position 2
