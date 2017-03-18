@@ -23,7 +23,8 @@ class Robot: public SampleRobot
 	ADXRS450_Gyro gyro;
 	Encoder *Renc;
 	Encoder *Lenc;
-	Encoder *Tenc;
+//	Encoder *Tenc;
+	Encoder *S1enc;
 	Relay *LightRed;
 	Relay *LightBlue;
 	Relay *LightGreen;
@@ -37,6 +38,8 @@ class Robot: public SampleRobot
 	CANTalon Right2;
 	CANTalon Lift;
 	CANTalon Lift2;
+//	CANTalon Shooter1;
+//	CANTalon Shooter2;
 	DoubleSolenoid Gripper;
 	DoubleSolenoid Funnel;
 	DoubleSolenoid Arm_floor;
@@ -57,6 +60,8 @@ public:
 			Right2(3),
 			Lift(6),//port may change
 			Lift2(7),
+//			Shooter1(),
+//			Shooter2(),
 			Gripper(0,4),
 			Funnel(2,6),
 			Arm_floor(1,5),
@@ -70,7 +75,8 @@ public:
 
 		Renc= new Encoder(2,3, true, Encoder::EncodingType::k4X);//both encoders counting forward.
 		Lenc= new Encoder(0,1, true, Encoder::EncodingType::k4X);// if counting wrong way, set it to false
-		Tenc= new Encoder(4,5, true, Encoder::EncodingType::k1X);// if counting wrong way, set it to false
+//		Tenc= new Encoder(4,5, true, Encoder::EncodingType::k1X);// if counting wrong way, set it to false
+		S1enc= new Encoder(4,5, true, Encoder::EncodingType::k1X);
 		LightRed= new Relay(0);  //for the LED lights
 		LightGreen= new Relay(1);
 		LightBlue= new Relay(2);
@@ -271,7 +277,14 @@ public:
 		Right1.ConfigNeutralMode(CANSpeedController::NeutralMode::kNeutralMode_Brake);
 		Right2.ConfigNeutralMode(CANSpeedController::NeutralMode::kNeutralMode_Brake);
 	}
+	void EncoderShooter()
+	{
+		//1024 cpr
+
+	}
+
 // functions for arm
+
 	void Arm_Up()
 	{
 		Arm_floor.Set(DoubleSolenoid::kForward);		//arm is up
@@ -452,9 +465,11 @@ public:
 
 	    //the button number is found by going to driver station, and pressing the button while controllers plugged into computer(it will light up green)
 		//Driver2
+
 			//funnel
 					//toggle
-					if(Gamepad.GetRawButton(1)){ // when we press the switch for the first time,
+					if(stick2.GetRawButton(5)){ // when we press the switch for the first time,
+						//Gamepad.GetRawButton(1)
 							if(!pressed) { // set as pressed
 								if(Funnel_Cycle==1) { // when we press it again, it gets turned off
 									Funnel_Cycle=0;
@@ -501,16 +516,16 @@ public:
 						Funnel.Set (DoubleSolenoid::kReverse);//retract
 					}
 			//lift
-			if(Gamepad.GetRawButton(6))  //lift intake up- right bumper
-			{
+			if(stick2.GetY())  //lift intake up- right bumper
+			{  //Gamepad.GetRawButton(6)
 				Lift.Set(1);
 				Lift2.Set(1);
 			}
-			else if(Gamepad.GetRawButton(5)&&(Gamepad.GetRawButton(9)))   //lift outtake down- left bumper and back button
-			{
-				Lift.Set(-1);
-				Lift2.Set(-1);
-			}
+//			else if(stick2.GetY()&&(stick2.GetRawButton(7)))   //lift outtake down- left bumper and back button
+//			{   //(Gamepad.GetRawButton(5)&&(Gamepad.GetRawButton(9)))
+//				Lift.Set(-1);
+//				Lift2.Set(-1);
+//			}
 			else //stop lift
 			{
 				Lift.Set(0.0);
@@ -519,13 +534,13 @@ public:
 
 		//Shared
 			//gripper
-		   if ((Gamepad.GetRawButton(8))||(stick1.GetRawButton(3)))  //gripper open- left trigger
-		   {
+		   if ((stick2.GetRawButton(3))||(stick1.GetRawButton(3)))  //gripper open- left trigger
+		   { //Gamepad.GetRawButton(8)
 			   Gripper.Set(DoubleSolenoid::kForward);
 			   Wait(0.05);
 		   }
-		   else if((Gamepad.GetRawButton(7))||(stick1.GetRawButton(1)))   //gripper close- right trigger
-		   {
+		   else if((stick2.GetRawButton(1))||(stick1.GetRawButton(1)))   //gripper close- right trigger
+		   {  //Gamepad.GetRawButton(7)
 			   Gripper.Set(DoubleSolenoid::kReverse);
 			   Wait(0.05);
 		   }
@@ -534,23 +549,23 @@ public:
 			   Gripper.Set(DoubleSolenoid::kOff);
 		   }
 		//arm
-		   if ((Gamepad.GetRawButton(4))||(stick1.GetRawButton(4)))//gear arm up- (both open) Right hand 4; Y button
-		   {
+		   if ((stick2.GetRawButton(4))||(stick1.GetRawButton(4)))//gear arm up- (both open) Right hand 4; Y button
+		   {  //Gamepad.GetRawButton(4)
 			   Arm_floor.Set(DoubleSolenoid::kForward);
 			   Arm_peg.Set(DoubleSolenoid::kForward);
 			   Gripper.Set(DoubleSolenoid::kReverse);//close gripper
 			   Wait(0.05);
 		   }
-		   else if((Gamepad.GetRawButton(3))||(stick1.GetRawButton(6))) //gear arm middle- (one open, one closed) Right hand 6; B button
-		   {
+		   else if((stick2.GetRawButton(6))||(stick1.GetRawButton(6))) //gear arm middle- (one open, one closed) Right hand 6; B button
+		   {  //Gamepad.GetRawButton(3)
 			   Arm_floor.Set(DoubleSolenoid::kReverse);
 			   Arm_peg.Set(DoubleSolenoid::kForward);
 			   Wait(0.08);
 			   Gripper.Set(DoubleSolenoid::kForward);//open gripper
 			   Wait(0.05);
 		   }
-		   else if ((Gamepad.GetRawButton(2))||(stick1.GetRawButton(2)))  //gear arm down- (both closed) Right hand 2; A button toggle
-		   {
+		   else if ((stick2.GetRawButton(2))||(stick1.GetRawButton(2)))  //gear arm down- (both closed) Right hand 2; A button toggle
+		   {  //Gamepad.GetRawButton(2)
 			   Arm_floor.Set(DoubleSolenoid::kReverse);
 			   Arm_peg.Set(DoubleSolenoid::kReverse); //changed this
 			   Wait(0.05);
@@ -579,13 +594,13 @@ public:
 
 			if(TimeT.Get()>.125)//after 1/8 second clear the timer
 			{
-			motorRPM= GetRpm(Tenc->Get(), 41, TimeT.Get());
-			Tenc->Reset();
+			motorRPM= GetRpm(S1enc->Get(), 41, TimeT.Get());
+			S1enc->Reset();
 			TimeT.Reset();
 			SetSpeed((SetRPM(Setpoint, motorRPM, CIM_RPM)));
 			}
 			//SetSpeed(1.0);//5000 rpm
-			printf("\n  RPM:%i, Output:%f, Encoder:%i", motorRPM, (SetRPM(Setpoint, motorRPM, CIM_RPM)),  Tenc->Get());
+			printf("\n  RPM:%i, Output:%f, Encoder:%i", motorRPM, (SetRPM(Setpoint, motorRPM, CIM_RPM)),  S1enc->Get());
 
 
 
