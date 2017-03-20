@@ -38,8 +38,8 @@ class Robot: public SampleRobot
 	CANTalon Right2;
 	CANTalon Lift;
 	CANTalon Lift2;
-//	CANTalon Shooter1;
-//	CANTalon Shooter2;
+	CANTalon Shooter1;
+	CANTalon Shooter2;
 	DoubleSolenoid Gripper;
 	DoubleSolenoid Funnel;
 	DoubleSolenoid Arm_floor;
@@ -60,8 +60,8 @@ public:
 			Right2(3),
 			Lift(6),//port may change
 			Lift2(7),
-//			Shooter1(),
-//			Shooter2(),
+			Shooter1(8), //may be the wrong #
+			Shooter2(9), // may be the wrong #
 			Gripper(0,4),
 			Funnel(2,6),
 			Arm_floor(1,5),
@@ -142,7 +142,7 @@ public:
 	}
 	void ExcellOut(float Setpoint, float ProcessData, float Output,float etc1,float etc2, int MethodInUse)// <$EO$> is a special tag so we can tell when to output a chunk of data
 	{
-		printf("\n <$EO$> %i, %i, %f, %f, %f, %f, %f, %f, %f, %f, %f ", Lenc->Get(), Renc->Get(), gyro.GetAngle(), 0.0, Setpoint, ProcessData, Output, etc1, etc2, MethodInUse, (clock/CLOCKS_PER_SEC));
+//		printf("\n <$EO$> %i, %i, %f, %f, %f, %f, %f, %f, %f, %f, %f ", Lenc->Get(), Renc->Get(), gyro.GetAngle(), 0.0, Setpoint, ProcessData, Output, etc1, etc2, MethodInUse, (clock/CLOCKS_PER_SEC));
 	}
 	//functions for drivetrain
 
@@ -516,10 +516,10 @@ public:
 						Funnel.Set (DoubleSolenoid::kReverse);//retract
 					}
 			//lift
-			if(stick2.GetY())  //lift intake up- right bumper
+			if(stick2.GetY()>0.2)  //lift intake up- right bumper
 			{  //Gamepad.GetRawButton(6)
-				Lift.Set(1);
-				Lift2.Set(1);
+				Lift.Set(stick2.GetY()); //joysticks scaled
+				Lift2.Set(stick2.GetY());
 			}
 //			else if(stick2.GetY()&&(stick2.GetRawButton(7)))   //lift outtake down- left bumper and back button
 //			{   //(Gamepad.GetRawButton(5)&&(Gamepad.GetRawButton(9)))
@@ -530,6 +530,18 @@ public:
 			{
 				Lift.Set(0.0);
 				Lift2.Set(0.0);
+			}
+
+			//shooter
+			if(stick2.GetRawButton(7))
+			{
+				Shooter1.Set(0.75);
+				Shooter2.Set(0.75);
+			}
+			else
+			{
+				Shooter1.Set(0.0);
+				Shooter1.Set(0.0);
 			}
 
 		//Shared
