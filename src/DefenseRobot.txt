@@ -560,10 +560,10 @@ public:
 //				index.Set(0.0);
 //			}
 
-			if(stick2.GetRawButton(7))
+			if(Gamepad.GetRawButton(2))  //a button
 			{
-				index.Set(0.60);
-				shooter.Set(0.60);
+				index.Set(0.90);
+				shooter.Set(0.90);
 			}
 
 			else

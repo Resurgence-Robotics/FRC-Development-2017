@@ -142,7 +142,7 @@ public:
 	}
 	void ExcellOut(float Setpoint, float ProcessData, float Output,float etc1,float etc2, int MethodInUse)// <$EO$> is a special tag so we can tell when to output a chunk of data
 	{
-//		printf("\n <$EO$> %i, %i, %f, %f, %f, %f, %f, %f, %f, %f, %f ", Lenc->Get(), Renc->Get(), gyro.GetAngle(), 0.0, Setpoint, ProcessData, Output, etc1, etc2, MethodInUse, (clock/CLOCKS_PER_SEC));
+		printf("\n <$EO$> %i, %i, %f, %f, %f, %f, %f, %f, %f, %df, %f ", Lenc->Get(), Renc->Get(), gyro.GetAngle(), 0.0, Setpoint, ProcessData, Output, etc1, etc2, MethodInUse,0.0);
 	}
 	//functions for drivetrain
 
@@ -232,7 +232,7 @@ public:
 		}
 	void GyroTurnRight(int angle)
 	{
-		float speed= 0.25;
+		float speed= 0.30;  //changed from 25
 		// for testing the gyro value
 // 90 to the right is +90
 //90 to the left is -90
@@ -250,7 +250,7 @@ public:
 	void GyroTurnLeft(int angle)
 
 	{
-		float speed= 0.25;
+		float speed= 0.30;  //changed from 25
 		ExcellOut(angle,0,0,0,0,3);
 		gyro.Reset();
 		Wait(0.1);
@@ -319,7 +319,7 @@ public:
 		initializeRobot();
 		Drive(83);
 		Wait(1.50);
-		GyroTurnRight(50);
+		GyroTurnRight(53);
 		Drive(34);
 		Wait(1.50);
 		Arm_Mid();  //dropping off the gear
@@ -346,7 +346,7 @@ public:
 		initializeRobot();
 		Drive(83);//-7
 		Wait(1.50);
-		GyroTurnLeft(50);
+		GyroTurnLeft(53);
 		Drive(32);
 		Wait(1.50);
 		Arm_Mid(); //drop off gear
@@ -437,8 +437,8 @@ public:
 				
 				
 				float Sensitivity =Map(stick1.GetRawAxis(2),-1.0 , 1.0, 0.125, 0.5);
-				float RightOutput= (JvalY - (Scale * (JvalX)));
-				float LeftOutput = (JvalY + (Scale * (JvalX)));
+				float RightOutput= (JvalY - (Scale * (JvalX*1.2))); //increase turning speed when moving
+				float LeftOutput = (JvalY + (Scale * (JvalX*1.2))); //increase turning speed when moving
 				float RotateOutput= (/*(JvalZ * 0.45)+*/(JvalX*0.4)); //change this number to change turning speed- 0.4
 				printf("\n X:%f", JvalX);
 				printf("\n Y:%f", JvalY);
