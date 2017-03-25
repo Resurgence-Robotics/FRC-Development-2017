@@ -220,6 +220,61 @@ public:
 				}
 			DriveFRC(0.0,0.0);
 		}
+	void drivestraightwithencoders2(float target, float speed)	// tested --working on final
+			{ //if need to change because it is not working, use Lenc instead of right, and test it to make sure it counts forward
+				gyro.Reset();
+				Renc->Reset();
+				Lenc->Reset();
+				Renc->Reset();
+				ExcellOut(target,0,0,0,0,1);
+				float wheel_radius =2.2;
+				float wheel_circumference = 2*M_PI*wheel_radius;
+				int PPR = 360;
+				float enc_in = PPR/wheel_circumference;
+				float IPS = 0; //inches per second
+				Timer DT;
+				DT.Reset();
+				Wait(0.25);
+				float kp = 0.125;
+				int enc =0;
+					if(target>0)//forward incrementing positive
+					{
+						DT.Start();
+						while((target>enc)&&(IsAutonomous()&&IsEnabled()))
+						{
+							float correction=kp*-1*gyro.GetAngle()+0.15;
+							enc=Renc->Get();
+							DriveFRC(speed, correction);
+							IPS= abs((enc_in*enc)/(DT.Get()));
+							ExcellOut(target,correction,IPS,0,0,1);
+							if(IPS<1&&DT.Get()>0.5)
+							{
+								DriveFRC(speed,correction); //we are moving, drive normal
+							}
+							else
+							{
+								SetSpeed(STOP);
+								break;
+							}
+							Wait(0.001);
+						}
+							DT.Stop();
+					}
+					if (target<0)//reverse incrementing negative			//UNTESTED
+					{
+						while((target<enc)&&(IsAutonomous()&&IsEnabled()))
+						{
+						float correction=kp*gyro.GetAngle()+0.15;
+						enc=Renc->Get();
+						DriveFRC(-speed, correction);
+
+						ExcellOut(target,correction,0,0,0,1);
+						Wait(0.001);
+						}
+					}
+				DriveFRC(0.0,0.0);
+			}
+
 	void Drive(float distance)									// tested --working on final( +- 3/8 in)
 //used to drive straight with encoders (measured in inches)
 		{
@@ -317,11 +372,11 @@ public:
 	void Peg_Left()  //autonomous for putting the gear on the left peg
 	{
 		initializeRobot();
-		Drive(83);
+		Drive(79); //was 83
 		Wait(1.50);
 		GyroTurnRight(53);
-		Drive(34);
-		Wait(1.50);
+		Drive(29);  //was 34
+		Wait(0.125); //changed from 1.5
 		Arm_Mid();  //dropping off the gear
 		Drive(-34);
 		Arm_Up();
@@ -336,6 +391,7 @@ public:
 		Arm_Mid(); //drop off gear
 		//below this not tested
 		Drive(-50);
+		Arm_Up();
 		GyroTurnRight(90);
 		Drive(70);
 		GyroTurnLeft(90);
@@ -344,11 +400,11 @@ public:
 	void Peg_Right()
 	{
 		initializeRobot();
-		Drive(83);//-7
+		Drive(79);//was 83
 		Wait(1.50);
 		GyroTurnLeft(53);
-		Drive(32);
-		Wait(1.50);
+		Drive(29);  //was 34
+		Wait(0.125); //changed from 1.5
 		Arm_Mid(); //drop off gear
 		Drive(-32);
 		Arm_Up();
@@ -392,12 +448,25 @@ public:
 
 			else if (Auto_Sel==4)
 			{
+
 				LightRed->Set(Relay::Value::kOff);
 				LightGreen->Set(Relay::Value::kOff); //turn the green light on
 				LightBlue->Set(Relay::Value::kOff);
 
 				initializeRobot();
 				GyroTurnRight(87);
+
+			}
+			else if (Auto_Sel==5)
+			{
+				while(IsAutonomous()&&IsEnabled())
+				{
+				SetSpeed(0.50,0.50);
+				printf(" \n Lenc:%i", Lenc->Get());
+				printf(" \n Renc:%i", Renc->Get());
+				Wait(5.0);
+				SetSpeed(STOP,STOP);
+				}
 
 			}
 			else  //if we did not select any of the 4
