@@ -415,77 +415,27 @@ public:
 //DRVERSTATION METHODS-- code entry-points below
 	void Autonomous()
 	{ //for the autonomus switch- needs to be tested witht the printf
-		int Auto_Sel=Map(Mode_Pot.GetVoltage(), 0, 5, 1, 12);  //0 is the input min, 5 is the input max (5Volts), 1 is the output max, 12 is the output max
-		printf("SW:%i\n", Auto_Sw.Get());
-		printf("Mode:%i \n", Auto_Sel);
-
-		if (Auto_Sw.Get()==true) //if we selected number 1,2, or 3 (it is true)
-		{
-			if (Auto_Sel==1) //if it is position 1
-			{
-				LightRed->Set(Relay::Value::kOff); //turn the other lights off
-				LightGreen->Set(Relay::Value::kForward); //turn green light on
-				LightBlue->Set(Relay::Value::kOff); //put the lights in the same order thoughout the code!
-
-				Peg_Left(); //use peg left
-			}
-			else if (Auto_Sel==2)//if it is in position 2
-			{
-				LightRed->Set(Relay::Value::kOff);
-				LightGreen->Set(Relay::Value::kForward);  //turn green light on
-				LightBlue->Set(Relay::Value::kOff);
-
-				Peg_Center(); //use peg center
-			}
-			else if (Auto_Sel==3)
-			{
-				LightRed->Set(Relay::Value::kOff);
-				LightGreen->Set(Relay::Value::kForward); //turn the green light on
-				LightBlue->Set(Relay::Value::kOff);
-
-				Peg_Right();
-			}
-
-			else if (Auto_Sel==4)
-			{
-
-				LightRed->Set(Relay::Value::kOff);
-				LightGreen->Set(Relay::Value::kOff); //turn the green light on
-				LightBlue->Set(Relay::Value::kOff);
-
-				initializeRobot();
-				GyroTurnRight(87);
-
-			}
-			else if (Auto_Sel==5)
-			{
-				while(IsAutonomous()&&IsEnabled())
-				{
-				SetSpeed(0.50,0.50);
-				printf(" \n Lenc:%i", Lenc->Get());
-				printf(" \n Renc:%i", Renc->Get());
-				Wait(5.0);
-				SetSpeed(STOP,STOP);
-				}
-
-			}
-			else  //if we did not select any of the 4
-			{
-				LightRed->Set(Relay::Value::kForward);// turn the red light on
-				LightGreen->Set(Relay::Value::kOff);//turnt the other lights off
-				LightBlue->Set(Relay::Value::kOff);// do not do anything other than turning the light on
-
-			}
-		}
-
-
-		else  //if we are did not select an autonomus run
-		{
-			LightRed->Set(Relay::Value::kForward);  //turn the light red
-			LightGreen->Set(Relay::Value::kOff);
+//		int Auto_Sel=Map(Mode_Pot.GetVoltage(), 0, 5, 1, 12);  //0 is the input min, 5 is the input max (5Volts), 1 is the output max, 12 is the output max
+//		printf("SW:%i\n", Auto_Sw.Get());
+//		printf("Mode:%i \n", Auto_Sel);
+//
+//		if (Auto_Sw.Get()==true) //if we selected number 1,2, or 3 (it is true)
+//		{
+			LightRed->Set(Relay::Value::kOff);
+			LightGreen->Set(Relay::Value::kForward);  //turn green light on
 			LightBlue->Set(Relay::Value::kOff);
 
-		}
+			Peg_Center(); //use peg center
+//		}
+//
+//
+//		else  //if we are did not select an autonomus run
+//		{
+//			LightRed->Set(Relay::Value::kForward);  //turn the light red
+//			LightGreen->Set(Relay::Value::kOff);
+//			LightBlue->Set(Relay::Value::kOff);
+//
+//		}
 	}
 	void OperatorControl()
 	{
