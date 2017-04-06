@@ -285,6 +285,15 @@ public:
 			float Target = distance*enc_in;
 			drivestraightwithencoders(Target, 0.35);
 		}
+	void Drive2(float distance) //uses drivestraigtwithencoders2
+	{
+		float wheel_radius =2.2;
+		float wheel_circumference = 2*M_PI*wheel_radius;
+		int PPR = 360;
+		float enc_in = PPR/wheel_circumference;
+		float Target = distance*enc_in;
+		drivestraightwithencoders2(Target, 0.35);
+	}
 	void GyroTurnRight(int angle)
 	{
 		float speed= 0.25;  //changed from 25
@@ -383,7 +392,7 @@ public:
 		GyroTurnLeft(50);
 		drivestraightwithencoders((10*360),1.0);//drive like a bat out of hell for 10 feet.
 	}
-	void Peg_Center()// tested- working
+	void Peg_Center()// tested- working  //uses Drive
 	{
 		initializeRobot();
 		Drive(80);
@@ -392,13 +401,13 @@ public:
 		//below this not tested
 		Drive(-50);
 		Arm_Up();
-		GyroTurnRight(90);
-		Drive(70);
-		GyroTurnLeft(90);
-		Drive(300);
+//		GyroTurnRight(90);
+//		Drive(70);
+//		GyroTurnLeft(90);
+//		Drive(300);
 	}
 	void Peg_Right()
-	{
+	{  //uses drive 2 and drivestraigtwithencoders2 instead of regular one
 		initializeRobot();
 		Drive(79);//was 83
 		Wait(1.50);
@@ -419,75 +428,75 @@ public:
 //		printf("SW:%i\n", Auto_Sw.Get());
 //		printf("Mode:%i \n", Auto_Sel);
 //
-        int Auto_Sel=Map(Mode_Pot.GetVoltage(), 0, 5, 1, 12);  //0 is the input min, 5 is the input max (5Volts), 1 is the output max, 12 is the output max
-        printf("SW:%i\n", Auto_Sw.Get());
-        printf("Mode:%i \n", Auto_Sel);
-
-        if (Auto_Sw.Get()==true) //if we selected number 1,2, or 3 (it is true)
-        {
-            if (Auto_Sel==11) //if it is position 1
-            {
-                LightRed->Set(Relay::Value::kOff); //turn the other lights off
-                LightGreen->Set(Relay::Value::kForward); //turn green light on
-                LightBlue->Set(Relay::Value::kOff); //put the lights in the same order thoughout the code!
-
-                Peg_Left(); //use peg left
-            }
-            else if (Auto_Sel==10)//if it is in position 2
-            {
+//        int Auto_Sel=Map(Mode_Pot.GetVoltage(), 0, 5, 1, 12);  //0 is the input min, 5 is the input max (5Volts), 1 is the output max, 12 is the output max
+//        printf("SW:%i\n", Auto_Sw.Get());
+//        printf("Mode:%i \n", Auto_Sel);
+//
+//        if (Auto_Sw.Get()==true) //if we selected number 1,2, or 3 (it is true)
+//        {
+//            if (Auto_Sel==11) //if it is position 11
+//            {
+//                LightRed->Set(Relay::Value::kOff); //turn the other lights off
+//                LightGreen->Set(Relay::Value::kForward); //turn green light on
+//                LightBlue->Set(Relay::Value::kOff); //put the lights in the same order thoughout the code!
+//
+//                Peg_Left(); //use peg left
+//            }
+//            else if (Auto_Sel==10)//if it is in position 10
+//            {
                 LightRed->Set(Relay::Value::kOff);
                 LightGreen->Set(Relay::Value::kForward);  //turn green light on
                 LightBlue->Set(Relay::Value::kOff);
 
                 Peg_Center(); //use peg center
-            }
-            else if (Auto_Sel==9)
-            {
-                LightRed->Set(Relay::Value::kOff);
-                LightGreen->Set(Relay::Value::kForward); //turn the green light on
-                LightBlue->Set(Relay::Value::kOff);
+//            }
+//            else if (Auto_Sel==9)
+//            {
+//                LightRed->Set(Relay::Value::kOff);
+//                LightGreen->Set(Relay::Value::kForward); //turn the green light on
+//                LightBlue->Set(Relay::Value::kOff);
+//
+//                Peg_Right();
+//            }
 
-                Peg_Right();
-            }
-
-            else if (Auto_Sel==4)
-            {
-
-                LightRed->Set(Relay::Value::kOff);
-                LightGreen->Set(Relay::Value::kOff); //turn the green light on
-                LightBlue->Set(Relay::Value::kOff);
-
-                initializeRobot();
-                GyroTurnRight(87);
-
-            }
-            else if (Auto_Sel==5)
-            {
-                while(IsAutonomous()&&IsEnabled())
-                {
-                SetSpeed(0.50,0.50);
-                printf(" \n Lenc:%i", Lenc->Get());
-                printf(" \n Renc:%i", Renc->Get());
-                Wait(5.0);
-                SetSpeed(STOP,STOP);
-                }
-
-            }
-            else  //if we did not select any of the 4
-            {
-                LightRed->Set(Relay::Value::kForward);// turn the red light on
-                LightGreen->Set(Relay::Value::kOff);//turnt the other lights off
-                LightBlue->Set(Relay::Value::kOff);// do not do anything other than turning the light on
-
-            }
-        }
-
-
-        else  //if we are did not select an autonomus run
-        {
-            LightRed->Set(Relay::Value::kForward);  //turn the light red
-            LightGreen->Set(Relay::Value::kOff);
-        }
+//            else if (Auto_Sel==4)
+//            {
+//
+//                LightRed->Set(Relay::Value::kOff);
+//                LightGreen->Set(Relay::Value::kOff); //turn the green light on
+//                LightBlue->Set(Relay::Value::kOff);
+//
+//                initializeRobot();
+//                GyroTurnRight(87);
+//
+//            }
+//            else if (Auto_Sel==5)
+//            {
+//                while(IsAutonomous()&&IsEnabled())
+//                {
+//                SetSpeed(0.50,0.50);
+//                printf(" \n Lenc:%i", Lenc->Get());
+//                printf(" \n Renc:%i", Renc->Get());
+//                Wait(5.0);
+//                SetSpeed(STOP,STOP);
+//                }
+//
+//            }
+//            else  //if we did not select any of the 4
+//            {
+//                LightRed->Set(Relay::Value::kForward);// turn the red light on
+//                LightGreen->Set(Relay::Value::kOff);//turnt the other lights off
+//                LightBlue->Set(Relay::Value::kOff);// do not do anything other than turning the light on
+//
+//            }
+//        }
+//
+//
+//        else  //if we are did not select an autonomus run
+//        {
+//            LightRed->Set(Relay::Value::kForward);  //turn the light red
+//            LightGreen->Set(Relay::Value::kOff);
+//        }
 
 //		if (Auto_Sw.Get()==true) //if we selected number 1,2, or 3 (it is true)
 //		{
@@ -512,7 +521,7 @@ public:
 		bool pressed=false;
 		int Funnel_Cycle=2;//initializing variable for funnel position//could probably set this to zero.
 		float timeElapsed=0;
-		float LoopTime=0.001;
+		float LoopTime=0.005;
 		while(IsOperatorControl() && IsEnabled())
 		{
 
@@ -684,32 +693,6 @@ public:
 	void Test()
 	{
 
-	Timer TimeT;
-	TimeT.Start();//actually measures time instead of simply adding the loop time
-	int motorRPM =0;
-	float Setpoint=3000;
-		while (IsTest() && IsEnabled() )
-		{
-
-		//	printf("\n Tenc:%i",);
-
-
-			if(TimeT.Get()>.125)//after 1/8 second clear the timer
-			{
-			motorRPM= GetRpm(S1enc->Get(), 41, TimeT.Get());
-			S1enc->Reset();
-			TimeT.Reset();
-			SetSpeed((SetRPM(Setpoint, motorRPM, CIM_RPM)));
-			}
-			//SetSpeed(1.0);//5000 rpm
-			printf("\n  RPM:%i, Output:%f, Encoder:%i", motorRPM, (SetRPM(Setpoint, motorRPM, CIM_RPM)),  S1enc->Get());
-
-
-
-
-
-			Wait(0.005);
-		}
 	}
 };
 
