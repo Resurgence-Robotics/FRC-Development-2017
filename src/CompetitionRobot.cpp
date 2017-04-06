@@ -425,7 +425,7 @@ public:
 
         if (Auto_Sw.Get()==true) //if we selected number 1,2, or 3 (it is true)
         {
-            if (Auto_Sel==1) //if it is position 1
+            if (Auto_Sel==11) //if it is position 1
             {
                 LightRed->Set(Relay::Value::kOff); //turn the other lights off
                 LightGreen->Set(Relay::Value::kForward); //turn green light on
@@ -433,7 +433,7 @@ public:
 
                 Peg_Left(); //use peg left
             }
-            else if (Auto_Sel==2)//if it is in position 2
+            else if (Auto_Sel==10)//if it is in position 2
             {
                 LightRed->Set(Relay::Value::kOff);
                 LightGreen->Set(Relay::Value::kForward);  //turn green light on
@@ -441,7 +441,7 @@ public:
 
                 Peg_Center(); //use peg center
             }
-            else if (Auto_Sel==3)
+            else if (Auto_Sel==9)
             {
                 LightRed->Set(Relay::Value::kOff);
                 LightGreen->Set(Relay::Value::kForward); //turn the green light on
