@@ -39,7 +39,7 @@ class Robot: public SampleRobot
 	CANTalon Lift;
 	CANTalon Lift2;
 	CANTalon Shooter1;
-	CANTalon Shooter2;
+	CANTalon INdex;
 	DoubleSolenoid Gripper;
 	DoubleSolenoid Funnel;
 	DoubleSolenoid Arm_floor;
@@ -60,8 +60,8 @@ public:
 			Right2(3),
 			Lift(6),//port may change
 			Lift2(7),
-			Shooter1(8), //may be the wrong #
-			Shooter2(9), // may be the wrong #
+			Shooter1(4), //may be the wrong #
+			INdex(5), // may be the wrong #
 			Gripper(0,4),
 			Funnel(2,6),
 			Arm_floor(1,5),
@@ -423,7 +423,10 @@ public:
 	}
 //DRVERSTATION METHODS-- code entry-points below
 	void Autonomous()
-	{ //for the autonomus switch- needs to be tested witht the printf
+	{
+//		DriveBrake();
+
+		//for the autonomus switch- needs to be tested witht the printf
 //		int Auto_Sel=Map(Mode_Pot.GetVoltage(), 0, 5, 1, 12);  //0 is the input min, 5 is the input max (5Volts), 1 is the output max, 12 is the output max
 //		printf("SW:%i\n", Auto_Sw.Get());
 //		printf("Mode:%i \n", Auto_Sel);
@@ -444,19 +447,19 @@ public:
 //            }
 //            else if (Auto_Sel==10)//if it is in position 10
 //            {
-                LightRed->Set(Relay::Value::kOff);
-                LightGreen->Set(Relay::Value::kForward);  //turn green light on
-                LightBlue->Set(Relay::Value::kOff);
-
-                Peg_Center(); //use peg center
+//                LightRed->Set(Relay::Value::kOff);
+//                LightGreen->Set(Relay::Value::kForward);  //turn green light on
+//                LightBlue->Set(Relay::Value::kOff);
+//
+//                Peg_Center(); //use peg center
 //            }
 //            else if (Auto_Sel==9)
 //            {
-//                LightRed->Set(Relay::Value::kOff);
-//                LightGreen->Set(Relay::Value::kForward); //turn the green light on
-//                LightBlue->Set(Relay::Value::kOff);
-//
-//                Peg_Right();
+                LightRed->Set(Relay::Value::kOff);
+                LightGreen->Set(Relay::Value::kForward); //turn the green light on
+                LightBlue->Set(Relay::Value::kOff);
+
+                Peg_Right();
 //            }
 
 //            else if (Auto_Sel==4)
@@ -518,6 +521,8 @@ public:
 	}
 	void OperatorControl()
 	{
+//		DriveCoast();
+
 		bool pressed=false;
 		int Funnel_Cycle=2;//initializing variable for funnel position//could probably set this to zero.
 		float timeElapsed=0;
@@ -632,16 +637,24 @@ public:
 			}
 
 			//shooter
-			if(stick2.GetRawButton(7))
+			if(stick2.GetRawButton(2)) //off
+			{
+				Shooter1.Set(0);
+			}
+			else if (stick2.GetRawButton(6)) //on
 			{
 				Shooter1.Set(0.75);
-				Shooter2.Set(0.75);
+			}
+
+			else if(stick2.GetRawButton(4)) //shoot
+			{
+				INdex.Set(0.75);
 			}
 			else
 			{
-				Shooter1.Set(0.0);
-				Shooter1.Set(0.0);
+				INdex.Set(0.0);
 			}
+
 
 		//Shared
 			//gripper
