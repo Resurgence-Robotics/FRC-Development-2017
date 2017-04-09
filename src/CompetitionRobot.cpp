@@ -643,12 +643,12 @@ public:
 			}
 			else if (stick2.GetRawButton(6)) //on
 			{
-				Shooter1.Set(0.75);
+				Shooter1.Set(0.49);
 			}
 
 			else if(stick2.GetRawButton(4)) //shoot
 			{
-				INdex.Set(0.75);
+				INdex.Set(1.0);
 			}
 			else
 			{
@@ -658,12 +658,12 @@ public:
 
 		//Shared
 			//gripper
-		   if ((stick2.GetRawButton(3))||(stick1.GetRawButton(3)))  //gripper open- left trigger
+		   if (stick1.GetRawButton(3))  //gripper open- left trigger
 		   { //Gamepad.GetRawButton(8)
 			   Gripper.Set(DoubleSolenoid::kForward);
 			   Wait(0.05);
 		   }
-		   else if((stick2.GetRawButton(1))||(stick1.GetRawButton(1)))   //gripper close- right trigger
+		   else if(stick1.GetRawButton(1))   //gripper close- right trigger
 		   {  //Gamepad.GetRawButton(7)
 			   Gripper.Set(DoubleSolenoid::kReverse);
 			   Wait(0.05);
@@ -673,14 +673,14 @@ public:
 			   Gripper.Set(DoubleSolenoid::kOff);
 		   }
 		//arm
-		   if ((stick2.GetRawButton(4))||(stick1.GetRawButton(4)))//gear arm up- (both open) Right hand 4; Y button
+		   if (stick1.GetRawButton(4))//gear arm up- (both open) Right hand 4; Y button
 		   {  //Gamepad.GetRawButton(4)
 			   Arm_floor.Set(DoubleSolenoid::kForward);
 			   Arm_peg.Set(DoubleSolenoid::kForward);
 			   Gripper.Set(DoubleSolenoid::kReverse);//close gripper
 			   Wait(0.05);
 		   }
-		   else if((stick2.GetRawButton(6))||(stick1.GetRawButton(6))) //gear arm middle- (one open, one closed) Right hand 6; B button
+		   else if(stick1.GetRawButton(6)) //gear arm middle- (one open, one closed) Right hand 6; B button
 		   {  //Gamepad.GetRawButton(3)
 			   Arm_floor.Set(DoubleSolenoid::kReverse);
 			   Arm_peg.Set(DoubleSolenoid::kForward);
@@ -688,7 +688,7 @@ public:
 			   Gripper.Set(DoubleSolenoid::kForward);//open gripper
 			   Wait(0.05);
 		   }
-		   else if ((stick2.GetRawButton(2))||(stick1.GetRawButton(2)))  //gear arm down- (both closed) Right hand 2; A button toggle
+		   else if (stick1.GetRawButton(2))  //gear arm down- (both closed) Right hand 2; A button toggle
 		   {  //Gamepad.GetRawButton(2)
 			   Arm_floor.Set(DoubleSolenoid::kReverse);
 			   Arm_peg.Set(DoubleSolenoid::kReverse); //changed this
