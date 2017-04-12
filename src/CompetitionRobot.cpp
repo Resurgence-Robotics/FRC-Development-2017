@@ -540,8 +540,8 @@ public:
 				
 				
 				float Sensitivity =Map(stick1.GetRawAxis(2),-1.0 , 1.0, 0.125, 0.5);
-				float RightOutput= (JvalY - (Scale * (JvalX*1.2))); //increase turning speed when moving
-				float LeftOutput = (JvalY + (Scale * (JvalX*1.2))); //increase turning speed when moving
+				float RightOutput= (JvalY - (Scale * (JvalX*1.5))); //increase turning speed when moving changed from 1.2
+				float LeftOutput = (JvalY + (Scale * (JvalX*1.5))); //increase turning speed when moving changed from 1.2
 				float RotateOutput= (/*(JvalZ * 0.45)+*/(JvalX*0.4)); //change this number to change turning speed- 0.4
 				printf("\n X:%f", JvalX);
 				printf("\n Y:%f", JvalY);
