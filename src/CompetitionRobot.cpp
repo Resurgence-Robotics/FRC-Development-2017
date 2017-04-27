@@ -198,7 +198,7 @@ public:
 				{
 					while((target>enc)&&(IsAutonomous()&&IsEnabled()))
 					{
-					float correction=kp*-1*gyro.GetAngle()+0.15;
+					float correction=kp*-1*gyro.GetAngle()+0.15605; //was 0.15
 					enc=Renc->Get();
 					DriveFRC(speed, correction);
 
@@ -622,8 +622,8 @@ public:
 			//lift
 			if(stick2.GetY()>0.2)  //lift intake up- right bumper
 			{  //Gamepad.GetRawButton(6)
-				Lift.Set(stick2.GetY()); //joysticks scaled
-				Lift2.Set(stick2.GetY());
+				Lift.Set(-stick2.GetY()); //joysticks scaled
+				Lift2.Set(-stick2.GetY());
 			}
 //			else if(stick2.GetY()&&(stick2.GetRawButton(7)))   //lift outtake down- left bumper and back button
 //			{   //(Gamepad.GetRawButton(5)&&(Gamepad.GetRawButton(9)))
