@@ -198,7 +198,7 @@ public:
 				{
 					while((target>enc)&&(IsAutonomous()&&IsEnabled()))
 					{
-					float correction=kp*-1*gyro.GetAngle()+0.15605; //was 0.15
+					float correction=kp*-1*gyro.GetAngle()+0.15; //was 0.15605
 					enc=Renc->Get();
 					DriveFRC(speed, correction);
 
@@ -381,12 +381,15 @@ public:
 	void Peg_Left()  //autonomous for putting the gear on the left peg
 	{
 		initializeRobot();
-		Drive(79); //was 83
+		Drive(80); //was 75
 		Wait(1.50);
-		GyroTurnRight(53);
-		Drive(29);  //was 34
+		GyroTurnRight(53.5); //was 53
+		Drive(20.5);  //was 19.5
 		Wait(0.125); //changed from 1.5
-		Arm_Mid();  //dropping off the gear
+		Arm_floor.Set(DoubleSolenoid::kReverse);  //arm is down
+		Arm_peg.Set(DoubleSolenoid::kReverse); //both pneumatic cylinders are open
+		Wait(0.05);
+		Gripper.Set(DoubleSolenoid::kForward); //open
 		Drive(-34);
 		Arm_Up();
 		GyroTurnLeft(50);
@@ -409,12 +412,15 @@ public:
 	void Peg_Right()
 	{  //uses drive 2 and drivestraigtwithencoders2 instead of regular one
 		initializeRobot();
-		Drive(79);//was 83
+		Drive(80);//was 79
 		Wait(1.50);
-		GyroTurnLeft(53);
-		Drive(29);  //was 34
+		GyroTurnLeft(53.5); //was 53
+		Drive(20.5);  //was 29
 		Wait(0.125); //changed from 1.5
-		Arm_Mid(); //drop off gear
+		Arm_floor.Set(DoubleSolenoid::kReverse);  //arm is down
+		Arm_peg.Set(DoubleSolenoid::kReverse); //both pneumatic cylinders are open
+		Wait(0.05);
+		Gripper.Set(DoubleSolenoid::kForward); //open
 		Drive(-32);
 		Arm_Up();
 		GyroTurnRight(50);
@@ -447,20 +453,20 @@ public:
 //            }
 //            else if (Auto_Sel==10)//if it is in position 10
 //            {
-//                LightRed->Set(Relay::Value::kOff);
-//                LightGreen->Set(Relay::Value::kForward);  //turn green light on
-//                LightBlue->Set(Relay::Value::kOff);
-//
-//                Peg_Center(); //use peg center
+                LightRed->Set(Relay::Value::kOff);
+                LightGreen->Set(Relay::Value::kForward);  //turn green light on
+                LightBlue->Set(Relay::Value::kOff);
+
+                Peg_Center(); //use peg center
 //            }
 //            else if (Auto_Sel==9)
 //            {
-                LightRed->Set(Relay::Value::kOff);
-                LightGreen->Set(Relay::Value::kForward); //turn the green light on
-                LightBlue->Set(Relay::Value::kOff);
-
-                Peg_Right();
-//            }
+//                LightRed->Set(Relay::Value::kOff);
+//                LightGreen->Set(Relay::Value::kForward); //turn the green light on
+//                LightBlue->Set(Relay::Value::kOff);
+//
+//                Peg_Right();
+////            }
 
 //            else if (Auto_Sel==4)
 //            {
@@ -506,7 +512,7 @@ public:
 //			LightRed->Set(Relay::Value::kOff);
 //			LightGreen->Set(Relay::Value::kForward);  //turn green light on
 //			LightBlue->Set(Relay::Value::kOff);
-
+//
 //			Peg_Center(); //use peg center
 //		}
 //
