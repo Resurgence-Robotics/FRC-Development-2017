@@ -381,7 +381,7 @@ public:
 	void Peg_Left()  //autonomous for putting the gear on the left peg
 	{
 		initializeRobot();
-		Drive(80); //was 75
+		Drive(81); //was 80
 		Wait(1.50);
 		GyroTurnRight(53.5); //was 53
 		Drive(20.5);  //was 19.5
@@ -412,7 +412,7 @@ public:
 	void Peg_Right()
 	{  //uses drive 2 and drivestraigtwithencoders2 instead of regular one
 		initializeRobot();
-		Drive(80);//was 79
+		Drive(81);//was 79
 		Wait(1.50);
 		GyroTurnLeft(53.5); //was 53
 		Drive(20.5);  //was 29
@@ -453,19 +453,19 @@ public:
 //            }
 //            else if (Auto_Sel==10)//if it is in position 10
 //            {
-                LightRed->Set(Relay::Value::kOff);
-                LightGreen->Set(Relay::Value::kForward);  //turn green light on
-                LightBlue->Set(Relay::Value::kOff);
-
-                Peg_Center(); //use peg center
+//                LightRed->Set(Relay::Value::kOff);
+//                LightGreen->Set(Relay::Value::kForward);  //turn green light on
+//                LightBlue->Set(Relay::Value::kOff);
+//
+//                Peg_Center(); //use peg center
 //            }
 //            else if (Auto_Sel==9)
 //            {
-//                LightRed->Set(Relay::Value::kOff);
-//                LightGreen->Set(Relay::Value::kForward); //turn the green light on
-//                LightBlue->Set(Relay::Value::kOff);
-//
-//                Peg_Right();
+                LightRed->Set(Relay::Value::kOff);
+                LightGreen->Set(Relay::Value::kForward); //turn the green light on
+                LightBlue->Set(Relay::Value::kOff);
+
+                Peg_Right();
 ////            }
 
 //            else if (Auto_Sel==4)
