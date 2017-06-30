@@ -81,8 +81,8 @@ public:
 		LightGreen= new Relay(1);
 		LightBlue= new Relay(2);
 
-		//CameraServer::GetInstance()->StartAutomaticCapture("cam0",0);
-		//CameraServer::GetInstance()->StartAutomaticCapture("cam1",1);
+		CameraServer::GetInstance()->StartAutomaticCapture("cam0",0);
+//		CameraServer::GetInstance()->StartAutomaticCapture("cam1",1);
 
 		gyro.Calibrate();  //calibrate the gyro
 		printf("\n gyro Calibrating...");
@@ -390,7 +390,7 @@ public:
 		Arm_peg.Set(DoubleSolenoid::kReverse); //both pneumatic cylinders are open
 		Wait(0.05);
 		Gripper.Set(DoubleSolenoid::kForward); //open
-		Drive(-34);
+		Drive(-32);
 		Arm_Up();
 		GyroTurnLeft(50);
 		drivestraightwithencoders((10*360),1.0);//drive like a bat out of hell for 10 feet.
@@ -445,11 +445,11 @@ public:
 //        {
 //            if (Auto_Sel==11) //if it is position 11
 //            {
-//                LightRed->Set(Relay::Value::kOff); //turn the other lights off
-//                LightGreen->Set(Relay::Value::kForward); //turn green light on
-//                LightBlue->Set(Relay::Value::kOff); //put the lights in the same order thoughout the code!
-//
-//                Peg_Left(); //use peg left
+                LightRed->Set(Relay::Value::kOff); //turn the other lights off
+                LightGreen->Set(Relay::Value::kForward); //turn green light on
+                LightBlue->Set(Relay::Value::kOff); //put the lights in the same order thoughout the code!
+
+                Peg_Left(); //use peg left
 //            }
 //            else if (Auto_Sel==10)//if it is in position 10
 //            {
@@ -461,11 +461,11 @@ public:
 //            }
 //            else if (Auto_Sel==9)
 //            {
-                LightRed->Set(Relay::Value::kOff);
-                LightGreen->Set(Relay::Value::kForward); //turn the green light on
-                LightBlue->Set(Relay::Value::kOff);
-
-                Peg_Right();
+//                LightRed->Set(Relay::Value::kOff);
+//                LightGreen->Set(Relay::Value::kForward); //turn the green light on
+//                LightBlue->Set(Relay::Value::kOff);
+//
+//                Peg_Right();
 ////            }
 
 //            else if (Auto_Sel==4)
@@ -577,53 +577,67 @@ public:
 		//Driver2
 
 			//funnel
-					//toggle
-					if(stick2.GetRawButton(5)){ // when we press the switch for the first time,
-						//Gamepad.GetRawButton(1)
-							if(!pressed) { // set as pressed
-								if(Funnel_Cycle==1) { // when we press it again, it gets turned off
-									Funnel_Cycle=0;
-								}else{
-									Funnel_Cycle= 1;
-								}
-							}
-						pressed = true; // keeping track of pressed allows the button to be
-					}else{ // held down
-						pressed = false;
-					}
-					if(Funnel_Cycle==1)
+//					//toggle
+//					if(stick2.GetRawButton(5)){ // when we press the switch for the first time,
+//						//Gamepad.GetRawButton(1)
+//							if(!pressed) { // set as pressed
+//								if(Funnel_Cycle==1) { // when we press it again, it gets turned off
+//									Funnel_Cycle=0;
+//								}else{
+//									Funnel_Cycle= 1;
+//								}
+//							}
+//						pressed = true; // keeping track of pressed allows the button to be
+//					}else{ // held down
+//						pressed = false;
+//					}
+//					if(Funnel_Cycle==1)
+//					{
+//						timeElapsed= timeElapsed - LoopTime;
+//						Funnel.Set(DoubleSolenoid::kForward);
+//						LightRed->Set(Relay::Value::kOff);
+//						LightGreen->Set(Relay::Value::kForward);  //when the funnel is open, turn the green light on
+//						LightBlue->Set(Relay::Value::kOff);
+//
+//						Wait(0.05);//extend
+//					}else if(Funnel_Cycle==0)
+//					{
+//						float HZ =80.0;  // Hertz= cycles per second
+//						if(timeElapsed<1/HZ) //every time the gyro resets, change the color of the lights
+//						{
+//							LightRed->Set(Relay::Value::kOff);
+//							LightGreen->Set(Relay::Value::kOff);
+//							LightBlue->Set(Relay::Value::kForward);
+//						}
+//						else if(timeElapsed < 2/HZ && timeElapsed > 1/HZ)
+//						{
+//							LightRed->Set(Relay::Value::kForward);
+//							LightGreen->Set(Relay::Value::kOff);
+//							LightBlue->Set(Relay::Value::kOff);
+//						}
+//						else
+//						{
+//							timeElapsed=0;
+//						}
+//						Funnel.Set(DoubleSolenoid::kReverse);
+//						Wait(0.05);//retract
+//					}else if(Funnel_Cycle==2)
+//					{
+//						Funnel.Set (DoubleSolenoid::kReverse);//retract
+//					}
+					if(stick2.GetRawButton(5))
 					{
-						timeElapsed= timeElapsed - LoopTime;
-						Funnel.Set(DoubleSolenoid::kForward);
+						Funnel.Set (DoubleSolenoid::kForward); //open funnel
 						LightRed->Set(Relay::Value::kOff);
 						LightGreen->Set(Relay::Value::kForward);  //when the funnel is open, turn the green light on
 						LightBlue->Set(Relay::Value::kOff);
-
-						Wait(0.05);//extend
-					}else if(Funnel_Cycle==0)
+					}
+					else
 					{
-						float HZ =80.0;  // Hertz= cycles per second
-						if(timeElapsed<1/HZ) //every time the gyro resets, change the color of the lights
-						{
-							LightRed->Set(Relay::Value::kOff);
-							LightGreen->Set(Relay::Value::kOff);
-							LightBlue->Set(Relay::Value::kForward);
-						}
-						else if(timeElapsed < 2/HZ && timeElapsed > 1/HZ)
-						{
-							LightRed->Set(Relay::Value::kForward);
-							LightGreen->Set(Relay::Value::kOff);
-							LightBlue->Set(Relay::Value::kOff);
-						}
-						else
-						{
-							timeElapsed=0;
-						}
-						Funnel.Set(DoubleSolenoid::kReverse);
-						Wait(0.05);//retract
-					}else if(Funnel_Cycle==2)
-					{
-						Funnel.Set (DoubleSolenoid::kReverse);//retract
+						Funnel.Set (DoubleSolenoid::kReverse); //close funnel;
+						LightRed->Set(Relay::Value::kOff);
+						LightGreen->Set(Relay::Value::kOff);
+						LightBlue->Set(Relay::Value::kForward);
 					}
 			//lift
 			if(stick2.GetY()>0.2)  //lift intake up- right bumper
