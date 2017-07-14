@@ -578,67 +578,67 @@ public:
 
 			//funnel
 //					//toggle
-//					if(stick2.GetRawButton(5)){ // when we press the switch for the first time,
-//						//Gamepad.GetRawButton(1)
-//							if(!pressed) { // set as pressed
-//								if(Funnel_Cycle==1) { // when we press it again, it gets turned off
-//									Funnel_Cycle=0;
-//								}else{
-//									Funnel_Cycle= 1;
-//								}
-//							}
-//						pressed = true; // keeping track of pressed allows the button to be
-//					}else{ // held down
-//						pressed = false;
-//					}
-//					if(Funnel_Cycle==1)
-//					{
-//						timeElapsed= timeElapsed - LoopTime;
-//						Funnel.Set(DoubleSolenoid::kForward);
-//						LightRed->Set(Relay::Value::kOff);
-//						LightGreen->Set(Relay::Value::kForward);  //when the funnel is open, turn the green light on
-//						LightBlue->Set(Relay::Value::kOff);
-//
-//						Wait(0.05);//extend
-//					}else if(Funnel_Cycle==0)
-//					{
-//						float HZ =80.0;  // Hertz= cycles per second
-//						if(timeElapsed<1/HZ) //every time the gyro resets, change the color of the lights
-//						{
-//							LightRed->Set(Relay::Value::kOff);
-//							LightGreen->Set(Relay::Value::kOff);
-//							LightBlue->Set(Relay::Value::kForward);
-//						}
-//						else if(timeElapsed < 2/HZ && timeElapsed > 1/HZ)
-//						{
-//							LightRed->Set(Relay::Value::kForward);
-//							LightGreen->Set(Relay::Value::kOff);
-//							LightBlue->Set(Relay::Value::kOff);
-//						}
-//						else
-//						{
-//							timeElapsed=0;
-//						}
-//						Funnel.Set(DoubleSolenoid::kReverse);
-//						Wait(0.05);//retract
-//					}else if(Funnel_Cycle==2)
-//					{
-//						Funnel.Set (DoubleSolenoid::kReverse);//retract
-//					}
-					if(stick2.GetRawButton(5))
+					if(stick2.GetRawButton(5)){ // when we press the switch for the first time,
+						//Gamepad.GetRawButton(1)
+							if(!pressed) { // set as pressed
+								if(Funnel_Cycle==1) { // when we press it again, it gets turned off
+									Funnel_Cycle=0;
+								}else{
+									Funnel_Cycle= 1;
+								}
+							}
+						pressed = true; // keeping track of pressed allows the button to be
+					}else{ // held down
+						pressed = false;
+					}
+					if(Funnel_Cycle==1)
 					{
-						Funnel.Set (DoubleSolenoid::kForward); //open funnel
+						timeElapsed= timeElapsed - LoopTime;
+						Funnel.Set(DoubleSolenoid::kForward);
 						LightRed->Set(Relay::Value::kOff);
 						LightGreen->Set(Relay::Value::kForward);  //when the funnel is open, turn the green light on
 						LightBlue->Set(Relay::Value::kOff);
-					}
-					else
+
+						Wait(0.05);//extend
+					}else if(Funnel_Cycle==0)
 					{
-						Funnel.Set (DoubleSolenoid::kReverse); //close funnel;
-						LightRed->Set(Relay::Value::kOff);
-						LightGreen->Set(Relay::Value::kOff);
-						LightBlue->Set(Relay::Value::kForward);
+						float HZ =80.0;  // Hertz= cycles per second
+						if(timeElapsed<1/HZ) //every time the gyro resets, change the color of the lights
+						{
+							LightRed->Set(Relay::Value::kOff);
+							LightGreen->Set(Relay::Value::kOff);
+							LightBlue->Set(Relay::Value::kForward);
+						}
+						else if(timeElapsed < 2/HZ && timeElapsed > 1/HZ)
+						{
+							LightRed->Set(Relay::Value::kForward);
+							LightGreen->Set(Relay::Value::kOff);
+							LightBlue->Set(Relay::Value::kOff);
+						}
+						else
+						{
+							timeElapsed=0;
+						}
+						Funnel.Set(DoubleSolenoid::kReverse);
+						Wait(0.05);//retract
+					}else if(Funnel_Cycle==2)
+					{
+						Funnel.Set (DoubleSolenoid::kReverse);//retract
 					}
+//					if(stick2.GetRawButton(5))
+//					{
+//						Funnel.Set (DoubleSolenoid::kForward); //open funnel
+//						LightRed->Set(Relay::Value::kOff);
+//						LightGreen->Set(Relay::Value::kForward);  //when the funnel is open, turn the green light on
+//						LightBlue->Set(Relay::Value::kOff);
+//					}
+//					else
+//					{
+//						Funnel.Set (DoubleSolenoid::kReverse); //close funnel;
+//						LightRed->Set(Relay::Value::kOff);
+//						LightGreen->Set(Relay::Value::kOff);
+//						LightBlue->Set(Relay::Value::kForward);
+//					}
 			//lift
 			if(stick2.GetY()>0.2)  //lift intake up- right bumper
 			{  //Gamepad.GetRawButton(6)
