@@ -81,7 +81,7 @@ public:
 		LightGreen= new Relay(1);
 		LightBlue= new Relay(2);
 
-		CameraServer::GetInstance()->StartAutomaticCapture("cam0",0);
+//		CameraServer::GetInstance()->StartAutomaticCapture("cam0",0);
 //		CameraServer::GetInstance()->StartAutomaticCapture("cam1",1);
 
 		gyro.Calibrate();  //calibrate the gyro
@@ -384,9 +384,9 @@ public:
 		Drive(81); //was 80
 		Wait(1.50);
 		GyroTurnRight(53.5); //was 53
-		Drive(20.5);  //was 19.5
+		Drive(21.5);  //was 20.5
 		Wait(0.125); //changed from 1.5
-		Arm_floor.Set(DoubleSolenoid::kReverse);  //arm is down
+		Arm_floor.Set(DoubleSolenoid::kForward);  //arm is down  //changed
 		Arm_peg.Set(DoubleSolenoid::kReverse); //both pneumatic cylinders are open
 		Wait(0.05);
 		Gripper.Set(DoubleSolenoid::kForward); //open
@@ -415,9 +415,9 @@ public:
 		Drive(81);//was 79
 		Wait(1.50);
 		GyroTurnLeft(53.5); //was 53
-		Drive(20.5);  //was 29
+		Drive(21.5);  //was 20.5
 		Wait(0.125); //changed from 1.5
-		Arm_floor.Set(DoubleSolenoid::kReverse);  //arm is down
+		Arm_floor.Set(DoubleSolenoid::kForward);  //arm is down  //changed
 		Arm_peg.Set(DoubleSolenoid::kReverse); //both pneumatic cylinders are open
 		Wait(0.05);
 		Gripper.Set(DoubleSolenoid::kForward); //open
@@ -445,11 +445,11 @@ public:
 //        {
 //            if (Auto_Sel==11) //if it is position 11
 //            {
-                LightRed->Set(Relay::Value::kOff); //turn the other lights off
-                LightGreen->Set(Relay::Value::kForward); //turn green light on
-                LightBlue->Set(Relay::Value::kOff); //put the lights in the same order thoughout the code!
-
-                Peg_Left(); //use peg left
+//                LightRed->Set(Relay::Value::kOff); //turn the other lights off
+//                LightGreen->Set(Relay::Value::kForward); //turn green light on
+//                LightBlue->Set(Relay::Value::kOff); //put the lights in the same order thoughout the code!
+//
+//                Peg_Left(); //use peg left
 //            }
 //            else if (Auto_Sel==10)//if it is in position 10
 //            {
@@ -461,11 +461,11 @@ public:
 //            }
 //            else if (Auto_Sel==9)
 //            {
-//                LightRed->Set(Relay::Value::kOff);
-//                LightGreen->Set(Relay::Value::kForward); //turn the green light on
-//                LightBlue->Set(Relay::Value::kOff);
-//
-//                Peg_Right();
+                LightRed->Set(Relay::Value::kOff);
+                LightGreen->Set(Relay::Value::kForward); //turn the green light on
+                LightBlue->Set(Relay::Value::kOff);
+
+                Peg_Right();
 ////            }
 
 //            else if (Auto_Sel==4)
