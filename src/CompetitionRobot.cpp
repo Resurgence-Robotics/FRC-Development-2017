@@ -384,7 +384,7 @@ public:
 		Drive(81); //was 80
 		Wait(1.50);
 		GyroTurnRight(53.5); //was 53
-		Drive(21.5);  //was 20.5
+		Drive(22);  //was 20.5
 		Wait(0.125); //changed from 1.5
 		Arm_floor.Set(DoubleSolenoid::kForward);  //arm is down  //changed
 		Arm_peg.Set(DoubleSolenoid::kReverse); //both pneumatic cylinders are open
@@ -415,7 +415,7 @@ public:
 		Drive(81);//was 79
 		Wait(1.50);
 		GyroTurnLeft(53.5); //was 53
-		Drive(21.5);  //was 20.5
+		Drive(22);  //was 20.5
 		Wait(0.125); //changed from 1.5
 		Arm_floor.Set(DoubleSolenoid::kForward);  //arm is down  //changed
 		Arm_peg.Set(DoubleSolenoid::kReverse); //both pneumatic cylinders are open
