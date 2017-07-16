@@ -25,9 +25,9 @@ class Robot: public SampleRobot
 	Encoder *Lenc;
 //	Encoder *Tenc;
 	Encoder *S1enc;
-	Relay *LightRed;
-	Relay *LightBlue;
-	Relay *LightGreen;
+//	Relay *LightRed;
+//	Relay *LightBlue;
+//	Relay *LightGreen;
 
 	Joystick stick1; // only joystick
 	Joystick stick2;
@@ -77,9 +77,9 @@ public:
 		Lenc= new Encoder(0,1, true, Encoder::EncodingType::k4X);// if counting wrong way, set it to false
 //		Tenc= new Encoder(4,5, true, Encoder::EncodingType::k1X);// if counting wrong way, set it to false
 		S1enc= new Encoder(4,5, true, Encoder::EncodingType::k1X);
-		LightRed= new Relay(0);  //for the LED lights
-		LightGreen= new Relay(1);
-		LightBlue= new Relay(2);
+//		LightRed= new Relay(0);  //for the LED lights
+//		LightGreen= new Relay(1);
+//		LightBlue= new Relay(2);
 
 //		CameraServer::GetInstance()->StartAutomaticCapture("cam0",0);
 //		CameraServer::GetInstance()->StartAutomaticCapture("cam1",1);
@@ -381,10 +381,10 @@ public:
 	void Peg_Left()  //autonomous for putting the gear on the left peg
 	{
 		initializeRobot();
-		Drive(81); //was 80
+		Drive(91); //was 81, then 86
 		Wait(1.50);
 		GyroTurnRight(53.5); //was 53
-		Drive(22);  //was 20.5
+		Drive(20.5);  //was 22
 		Wait(0.125); //changed from 1.5
 		Arm_floor.Set(DoubleSolenoid::kForward);  //arm is down  //changed
 		Arm_peg.Set(DoubleSolenoid::kReverse); //both pneumatic cylinders are open
@@ -412,10 +412,10 @@ public:
 	void Peg_Right()
 	{  //uses drive 2 and drivestraigtwithencoders2 instead of regular one
 		initializeRobot();
-		Drive(81);//was 79
+		Drive(91);//was 81, then 86
 		Wait(1.50);
 		GyroTurnLeft(53.5); //was 53
-		Drive(22);  //was 20.5
+		Drive(20.5);  //was 22
 		Wait(0.125); //changed from 1.5
 		Arm_floor.Set(DoubleSolenoid::kForward);  //arm is down  //changed
 		Arm_peg.Set(DoubleSolenoid::kReverse); //both pneumatic cylinders are open
@@ -448,8 +448,8 @@ public:
 //                LightRed->Set(Relay::Value::kOff); //turn the other lights off
 //                LightGreen->Set(Relay::Value::kForward); //turn green light on
 //                LightBlue->Set(Relay::Value::kOff); //put the lights in the same order thoughout the code!
-//
-//                Peg_Left(); //use peg left
+
+                Peg_Left(); //use peg left
 //            }
 //            else if (Auto_Sel==10)//if it is in position 10
 //            {
@@ -461,11 +461,11 @@ public:
 //            }
 //            else if (Auto_Sel==9)
 //            {
-                LightRed->Set(Relay::Value::kOff);
-                LightGreen->Set(Relay::Value::kForward); //turn the green light on
-                LightBlue->Set(Relay::Value::kOff);
-
-                Peg_Right();
+//                LightRed->Set(Relay::Value::kOff);
+//                LightGreen->Set(Relay::Value::kForward); //turn the green light on
+//                LightBlue->Set(Relay::Value::kOff);
+//
+//                Peg_Right();
 ////            }
 
 //            else if (Auto_Sel==4)
@@ -595,9 +595,9 @@ public:
 					{
 						timeElapsed= timeElapsed - LoopTime;
 						Funnel.Set(DoubleSolenoid::kForward);
-						LightRed->Set(Relay::Value::kOff);
-						LightGreen->Set(Relay::Value::kForward);  //when the funnel is open, turn the green light on
-						LightBlue->Set(Relay::Value::kOff);
+//						LightRed->Set(Relay::Value::kOff);
+//						LightGreen->Set(Relay::Value::kForward);  //when the funnel is open, turn the green light on
+//						LightBlue->Set(Relay::Value::kOff);
 
 						Wait(0.05);//extend
 					}else if(Funnel_Cycle==0)
@@ -605,15 +605,15 @@ public:
 						float HZ =80.0;  // Hertz= cycles per second
 						if(timeElapsed<1/HZ) //every time the gyro resets, change the color of the lights
 						{
-							LightRed->Set(Relay::Value::kOff);
-							LightGreen->Set(Relay::Value::kOff);
-							LightBlue->Set(Relay::Value::kForward);
+//							LightRed->Set(Relay::Value::kOff);
+//							LightGreen->Set(Relay::Value::kOff);
+//							LightBlue->Set(Relay::Value::kForward);
 						}
 						else if(timeElapsed < 2/HZ && timeElapsed > 1/HZ)
 						{
-							LightRed->Set(Relay::Value::kForward);
-							LightGreen->Set(Relay::Value::kOff);
-							LightBlue->Set(Relay::Value::kOff);
+//							LightRed->Set(Relay::Value::kForward);
+//							LightGreen->Set(Relay::Value::kOff);
+//							LightBlue->Set(Relay::Value::kOff);
 						}
 						else
 						{
