@@ -306,10 +306,10 @@ public:
 
 		//Driver1
 			//drivetrain
-				float threshold= 0.08;
+				float threshold= 0.13;  //was at .08
 				float JvalY=stick1.GetY();//+up
 				float JvalX=stick1.GetX();//+right
-				float JvalZ=stick1.GetRawAxis(2); //turing when not moving
+				float JvalZ=stick1.GetRawAxis(3); //turing when not moving
 				float Scale =0.25; //going at 25%power
 				float RightOutput= (JvalY - (Scale * (JvalX)));
 				float LeftOutput = (JvalY + (Scale * (JvalX)));

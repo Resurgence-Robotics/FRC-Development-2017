@@ -545,7 +545,7 @@ public:
 				float Scale =0.25; //going at 25%power
 				
 				
-				float Sensitivity =Map(stick1.GetRawAxis(2),-1.0 , 1.0, 0.125, 0.5);
+				float Sensitivity =0.4;//Map(stick1.GetRawAxis(2),-1.0 , 1.0, 0.125, 0.5);
 				float RightOutput= (JvalY - (Scale * (JvalX*1.5))); //increase turning speed when moving changed from 1.2
 				float LeftOutput = (JvalY + (Scale * (JvalX*1.5))); //increase turning speed when moving changed from 1.2
 				float RotateOutput= (/*(JvalZ * 0.45)+*/(JvalX*0.4)); //change this number to change turning speed- 0.4
