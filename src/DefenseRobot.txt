@@ -212,7 +212,7 @@ public:
 			gyro.Reset();
 			Wait(0.1);
 //			ExcellOut(angle,0,0,0,0,2);
-			while ((gyro.GetAngle()<angle)&&(IsAutonomous()&&IsEnabled())) //turn right 45 degrees  Tested 2/18- works; to go 90 degrees set it to 84
+			while ((gyro.GetAngle()<angle)&&(IsOperatorControl()&&IsEnabled())) //turn right 45 degrees  Tested 2/18- works; to go 90 degrees set it to 84
 			{
 //				ExcellOut(angle,0,0,0,0,0);
 				SetSpeed(-speed,speed);
@@ -227,7 +227,7 @@ public:
 //			ExcellOut(angle,0,0,0,0,3);
 			gyro.Reset();
 			Wait(0.1);
-			while ((gyro.GetAngle()> (-1*angle))&&(IsAutonomous()&&IsEnabled())) //turn left 45 degrees
+			while ((gyro.GetAngle()> (-1*angle))&&(IsOperatorControl()&&IsEnabled())) //turn left 45 degrees
 			{
 //				ExcellOut(angle,0,0,0,0,0);
 				SetSpeed(speed,-speed);
@@ -329,6 +329,11 @@ public:
 					SetSpeed((-1*RotateOutput), RotateOutput);  //twist and shout (turn)
 				}
 
+				if(stick1.GetRawButton(2))
+				{
+					GyroTurnRight(180);
+				}
+				
 		   timeElapsed= timeElapsed + LoopTime;
 		  Wait(LoopTime);
 		}

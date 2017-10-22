@@ -381,7 +381,7 @@ public:
 	void Peg_Left()  //autonomous for putting the gear on the left peg
 	{
 		initializeRobot();
-		Drive(91); //was 81, then 86
+		Drive(81); //was 81, then 86
 		Wait(1.50);
 		GyroTurnRight(53.5); //was 53
 		Drive(20.5);  //was 22
@@ -412,7 +412,7 @@ public:
 	void Peg_Right()
 	{  //uses drive 2 and drivestraigtwithencoders2 instead of regular one
 		initializeRobot();
-		Drive(91);//was 81, then 86
+		Drive(81);//was 81, then 86
 		Wait(1.50);
 		GyroTurnLeft(53.5); //was 53
 		Drive(20.5);  //was 22
