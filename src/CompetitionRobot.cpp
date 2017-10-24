@@ -1,34 +1,60 @@
+//robot libraries
 #include "WPILib.h"
 #include "CANTalon.h"
 #include "math.h"
+//gnu libraries
+#include "Socket.hpp"
+#include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <errno.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <sys/ioctl.h>
+#include <net/if.h>
 
+using namespace std;
 #define leftY 1
 #define rightY 3
+#define STOP 0.0
+#define CIM_RPM 5000
+
+string OPENMESHIP("10.10.80.1");
+string RoborioIP("10.10.80.2");//i am the client
+string TegraIP("10.10.80.3");// i am the server
+string CameraIP("10.10.80.20");
+string RoborioDHCP("roboRIO-1080-FRC.local");
+string TegraDHCP("tegra-ubuntu.local");
 
 void StartExcellLogging()//hopefully will be used in VS for a reason to start data logging when we get there
 	{
 	printf("\n <$EO$> Lenc, Renc, Gyro, Accel, Setpoint, ProcessData, Output, Auto_Sw, Run_Mode, Method, Time");
 	}
-	void StopExcellLoging()//will be used in VS for a reason to stop data logging
+void StopExcellLoging()//will be used in VS for a reason to stop data logging
 	{
 	printf("\n <$EO$> STOPLOG");
 	}
 	
-#define STOP 0.0
-#define CIM_RPM 5000
+
+
+
+
 class Robot: public SampleRobot
 {
 	//intialize class members here
+	TD::Socket client;
 	PowerDistributionPanel *m_pdp;
 	ADXRS450_Gyro gyro;
 	Encoder *Renc;
 	Encoder *Lenc;
-//	Encoder *Tenc;
-	Encoder *S1enc;
-//	Relay *LightRed;
-//	Relay *LightBlue;
-//	Relay *LightGreen;
-
+	Relay *LightRed;
+	Relay *LightBlue;
+	Relay *LightGreen;
 	Joystick stick1; // only joystick
 	Joystick stick2;
 	Joystick Gamepad;
@@ -70,19 +96,14 @@ public:
 			Auto_Sw(9)
 
 	{
-
 		m_pdp =new PowerDistributionPanel();
-
 		Renc= new Encoder(2,3, true, Encoder::EncodingType::k4X);//both encoders counting forward.
 		Lenc= new Encoder(0,1, true, Encoder::EncodingType::k4X);// if counting wrong way, set it to false
-//		Tenc= new Encoder(4,5, true, Encoder::EncodingType::k1X);// if counting wrong way, set it to false
-		S1enc= new Encoder(4,5, true, Encoder::EncodingType::k1X);
-//		LightRed= new Relay(0);  //for the LED lights
-//		LightGreen= new Relay(1);
-//		LightBlue= new Relay(2);
+		LightRed= new Relay(0);  //for the LED lights
+		LightGreen= new Relay(1);
+		LightBlue= new Relay(2);
 
 //		CameraServer::GetInstance()->StartAutomaticCapture("cam0",0);
-//		CameraServer::GetInstance()->StartAutomaticCapture("cam1",1);
 
 		gyro.Calibrate();  //calibrate the gyro
 		printf("\n gyro Calibrating...");
@@ -346,9 +367,7 @@ public:
 		//1024 cpr
 
 	}
-
 // functions for arm
-
 	void Arm_Up()
 	{
 		Arm_floor.Set(DoubleSolenoid::kForward);		//arm is up
