@@ -1,6 +1,6 @@
 //robot libraries
 #include "WPILib.h"
-#include "CANTalon.h"
+#include "ctrlib/CANTalon.h"
 #include "math.h"
 //gnu libraries
 #include "Socket.hpp"
@@ -47,7 +47,7 @@ void StopExcellLoging()//will be used in VS for a reason to stop data logging
 class Robot: public SampleRobot
 {
 	//intialize class members here
-	TD::Socket client;
+	//TD::Socket client;
 	PowerDistributionPanel *m_pdp;
 	ADXRS450_Gyro gyro;
 	Encoder *Renc;
